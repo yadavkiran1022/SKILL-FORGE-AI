@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Creativity Challenges - Skill Forge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><div class="logo-icon">⚡</div> Skill Forge AI</a>
+<ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html">Assess</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="creativity.html" class="active">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html">Habits</a></li>
+        <li><a href="chat.html">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="section" style="padding-top: 100px;">
+    <div class="section-header">
+      <span class="section-label">Creativity Challenges</span>
+      <h2>Train Your Creative Mind</h2>
+      <p>Timed challenges to boost your creativity, critical thinking, and problem-solving skills.</p>
+    </div>
+    <div class="challenge-container">
+      <div class="challenge-card">
+        <div class="challenge-type" id="challengeType">Brainstorming</div>
+        <h3 id="challengeTitle">The 10 Ideas Method</h3>
+        <p id="challengeDesc">Come up with 10 different uses for a paperclip. Think beyond the obvious!</p>
+        <div class="timer" id="challengeTimer">03:00</div>
+        <textarea id="challengeInput" placeholder="Type your ideas here..." rows="4"></textarea>
+        <div style="display:flex; gap:12px; justify-content:center;">
+          <button class="btn btn-primary" onclick="submitChallenge()">Submit & Earn XP</button>
+          <button class="btn btn-secondary" onclick="nextChallenge()">Skip →</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>⚡ Skill Forge AI</h4><p style="color:var(--text-muted);font-size:0.9rem;">Your personal growth companion.</p></div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="assessment.html">Skill Assessment</a></li><li><a href="creativity.html">Creativity</a></li><li><a href="speaking.html">Speaking</a></li><li><a href="habits.html">Habits</a></li><li><a href="chat.html">AI Mentor</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">© 2025 Skill Forge AI</div>
+  </footer>
+
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    const challenges = [
+      { type: 'Brainstorming', title: 'The 10 Ideas Method', desc: 'Come up with 10 different uses for a paperclip. Think beyond the obvious!' },
+      { type: 'Problem Solving', title: 'Reverse Thinking', desc: 'Think of a problem you have. Now think of 5 ways to make it WORSE. Reverse those to find solutions.' },
+      { type: 'Creative Writing', title: 'Story Starter', desc: 'Write a 3-sentence story that starts with: "The last robot on Earth opened its eyes..."' },
+      { type: 'Design Thinking', title: 'Redesign Something', desc: 'Pick an everyday object (chair, bottle, lamp). How would you redesign it for 2050?' },
+      { type: 'Critical Thinking', title: 'Both Sides', desc: 'Pick a controversial topic. Write 3 strong arguments FOR and 3 AGAINST it.' },
+    ];
+    let currentChallenge = Math.floor(Math.random() * challenges.length);
+    let challengeTimer;
+    let challengeTimeLeft = 180;
+
+    function loadChallenge() {
+      const c = challenges[currentChallenge];
+      document.getElementById('challengeType').textContent = c.type;
+      document.getElementById('challengeTitle').textContent = c.title;
+      document.getElementById('challengeDesc').textContent = c.desc;
+      document.getElementById('challengeInput').value = '';
+      startChallengeTimer();
+    }
+
+    function startChallengeTimer() {
+      clearInterval(challengeTimer);
+      challengeTimeLeft = 180;
+      updateTimerDisplay();
+      challengeTimer = setInterval(() => {
+        challengeTimeLeft--;
+        updateTimerDisplay();
+        if (challengeTimeLeft <= 0) {
+          clearInterval(challengeTimer);
+          showToast('⏰ Time\'s up! Try submitting what you have.');
+        }
+      }, 1000);
+    }
+
+    function updateTimerDisplay() {
+      const mins = Math.floor(challengeTimeLeft / 60);
+      const secs = challengeTimeLeft % 60;
+      document.getElementById('challengeTimer').textContent = `${String(mins).padStart(2, '0')}:${String(secs).padStart(2, '0')}`;
+    }
+
+    function submitChallenge() {
+      const input = document.getElementById('challengeInput').value.trim();
+      if (!input) { showToast('Write something before submitting!'); return; }
+      clearInterval(challengeTimer);
+      state.creativityCompleted++;
+      addXP(25);
+      checkBadges();
+      showToast('🎨 Challenge submitted! +25 XP');
+      setTimeout(() => nextChallenge(), 1500);
+    }
+
+    function nextChallenge() {
+      clearInterval(challengeTimer);
+      currentChallenge = (currentChallenge + 1) % challenges.length;
+      loadChallenge();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      loadChallenge();
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+      document.getElementById('authModal')?.addEventListener('click', function(e) { if (e.target === e.currentTarget) closeAuthModal(); });
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() { document.getElementById('navLinks').classList.toggle('open'); });
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) { e.stopPropagation(); userDropdown.classList.toggle('open'); userAvatar.classList.toggle('open'); });
+        document.addEventListener('click', function() { userDropdown.classList.remove('open'); userAvatar.classList.remove('open'); });
+      }
+    });
+  </script>
+</body>
+</html>

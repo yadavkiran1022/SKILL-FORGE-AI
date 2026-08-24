@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Course Detail - Skill Forge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><div class="logo-icon">⚡</div> Skill Forge AI</a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html">Assess</a></li>
+        <li><a href="courses.html" class="active">Courses</a></li>
+        <li><a href="creativity.html">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html">Habits</a></li>
+        <li><a href="chat.html">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="section" style="padding-top: 100px;">
+    <div class="course-detail-container" id="courseDetailContainer">
+      <p style="color:var(--text-muted); text-align:center;">Loading course...</p>
+    </div>
+  </div>
+
+  <!-- Certificate Modal -->
+  <div class="modal-overlay" id="certModal">
+    <div class="modal">
+      <button class="close-modal" onclick="closeCertModal()">✕</button>
+      <div class="certificate" id="certificateDisplay"></div>
+      <div style="display:flex; gap:12px; justify-content:center; margin-top:20px;">
+        <button class="btn btn-primary" onclick="downloadCertificate()">⬇️ Download PDF</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-secondary" onclick="closeCertModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>⚡ Skill Forge AI</h4><p style="color:var(--text-muted);font-size:0.9rem;">Your personal growth companion.</p></div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="assessment.html">Skill Assessment</a></li><li><a href="creativity.html">Creativity</a></li><li><a href="speaking.html">Speaking</a></li><li><a href="habits.html">Habits</a></li><li><a href="chat.html">AI Mentor</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="dashboard.html">Dashboard</a></li><li><a href="certificates.html">Certificates</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">© 2025 Skill Forge AI</div>
+  </footer>
+
+<script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/courses.js"></script>
+  <script src="js/courses_details_p1.js"></script>
+  <script src="js/courses_details_p2.js"></script>
+  <script src="js/courses_details_p3.js"></script>
+  <script src="js/courses_details_p4.js"></script>
+  <script src="js/courses_details_p5.js"></script>
+  <script src="js/courses_details_p6.js"></script>
+  <script src="js/courses_details.js"></script>
+  <script>
+    let currentCourseId = null;
+    let currentLesson = 0;
+    let quizAnswers = [];
+    let quizSubmitted = false;
+
+    function getCourseIdFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('id');
+    }
+
+    function renderCourse() {
+      const container = document.getElementById('courseDetailContainer');
+      const courseId = getCourseIdFromUrl();
+      if (!courseId) {
+        container.innerHTML = '<p style="color:var(--text-muted); text-align:center;">No course selected. <a href="courses.html" style="color:var(--accent);">Browse courses →</a></p>';
+        return;
+      }
+      const course = getCourseById(courseId);
+      if (!course) {
+        container.innerHTML = '<p style="color:var(--text-muted); text-align:center;">Course not found. <a href="courses.html" style="color:var(--accent);">Browse courses →</a></p>';
+        return;
+      }
+      currentCourseId = courseId;
+      currentLesson = 0;
+      quizAnswers = [];
+      quizSubmitted = false;
+      
+      const progress = getCourseProgress(courseId);
+      const percent = getCourseCompletionPercent(courseId);
+      const completed = isCourseCompleted(courseId);
+      const cat = COURSE_CATEGORIES.find(c => c.id === course.category);
+      const cert = state.certificates[courseId];
+      
+      container.innerHTML = `
+        <a href="courses.html" class="back-link">← Back to Courses</a>
+        <div class="course-detail-header">
+          <div class="course-detail-icon">${course.icon}</div>
+          <div>
+            <div class="course-cat">${cat ? cat.icon + ' ' + cat.name : ''}</div>
+            <h2>${course.title}</h2>
+            <p>${course.description}</p>
+            <div class="course-meta">
+              <span>⏱ ${course.duration}</span>
+              <span>📖 ${course.lessons.length} lessons</span>
+              <span>🎯 ${course.level}</span>
+            </div>
+            <div class="course-progress-bar big"><div class="course-progress-fill" style="width:${percent}%"></div></div>
+            <div style="display:flex; justify-content:space-between; align-items:center;">
+              <span style="color:var(--text-muted); font-size:0.9rem;">${percent}% complete</span>
+              ${cert ? '<span class="cert-earned">🏆 Certificate Earned</span>' : (completed ? '<span class="cert-ready">🎓 Ready for Certificate!</span>' : '')}
+            </div>
+          </div>
+        </div>
+
+        <div class="course-content-wrap">
+          <div class="course-lessons-panel">
+            <h3>📚 Lessons</h3>
+            <div class="course-lesson-list" id="lessonList">
+              ${course.lessons.map((lesson, i) => {
+                const done = isLessonCompleted(courseId, i);
+                const active = i === currentLesson;
+                return `<div class="course-lesson-item ${active ? 'active' : ''} ${done ? 'done' : ''}" onclick="selectLesson(${i})">
+                  <span class="lesson-num">${done ? '✓' : i + 1}</span>
+                  <span>${lesson.title}</span>
+                </div>`;
+              }).join('')}
+            </div>
+            ${cert ? `<div class="certificate-link" onclick="openCertModal('${courseId}')">🏆 View Certificate</div>` : ''}
+          </div>
+          <div class="course-lesson-content">
+            <div id="lessonContent"></div>
+          </div>
+        </div>
+      `;
+      
+      renderLesson();
+    }
+
+    function renderLessonDetail(lesson) {
+      if (!lesson.detail) {
+        return '<p>' + lesson.theory + '</p>';
+      }
+      const d = lesson.detail;
+      let html = '';
+      if (d.intro) html += '<p class="lesson-intro">' + d.intro + '</p>';
+      if (d.objectives && d.objectives.length) {
+        html += '<div class="lesson-block lesson-objectives"><h4>🎯 What You\'ll Learn</h4><ul>';
+        d.objectives.forEach(function (o) { html += '<li>' + o + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (d.sections) {
+        d.sections.forEach(function (sec) {
+          html += '<div class="lesson-block">';
+          html += '<h4>' + sec.heading + '</h4>';
+          if (sec.paragraphs) sec.paragraphs.forEach(function (p) { html += '<p>' + p + '</p>'; });
+          if (sec.bullets) {
+            html += '<ul>';
+            sec.bullets.forEach(function (b) { html += '<li>' + b + '</li>'; });
+            html += '</ul>';
+          }
+          if (sec.code) html += '<pre class="lesson-code"><code>' + sec.code + '</code></pre>';
+          if (sec.tip) html += '<div class="lesson-tip">💡 ' + sec.tip + '</div>';
+          html += '</div>';
+        });
+      }
+      // Learning Phases (structured progression for the lesson)
+      if (d.phases && d.phases.length) {
+        html += '<div class="lesson-block lesson-phases"><h4>🧭 Learning Phases</h4>';
+        d.phases.forEach(function (ph, i) {
+          html += '<div class="lesson-phase"><span class="phase-badge">Phase ' + (i + 1) + '</span><strong>' + ph.title + '</strong>';
+          if (ph.desc) html += '<p>' + ph.desc + '</p>';
+          if (ph.bullets) {
+            html += '<ul>';
+            ph.bullets.forEach(function (b) { html += '<li>' + b + '</li>'; });
+            html += '</ul>';
+          }
+          html += '</div>';
+        });
+        html += '</div>';
+      } else {
+        // Auto-generated phases so EVERY lesson has a clear learning path
+        html += '<div class="lesson-block lesson-phases"><h4>🧭 Learning Phases</h4>';
+        var fallbackPhases = [
+          { title: 'Understand the Core Idea', desc: 'Read the theory above slowly and identify the single most important concept. Try to rephrase it in your own words.' },
+          { title: 'Break It Down & Apply', desc: 'Relate each concept to a real-world example you already know. Write a short note or sketch showing how the pieces fit together.' },
+          { title: 'Test Your Knowledge', desc: 'Complete the quiz below. Every question connects directly to a key idea from this lesson — use the feedback to find gaps.' },
+          { title: 'Review & Reinforce', desc: 'Come back in 24–48 hours and explain this topic from memory. Re-reading after a short break locks it into long-term memory.' }
+        ];
+        fallbackPhases.forEach(function (ph, i) {
+          html += '<div class="lesson-phase"><span class="phase-badge">Phase ' + (i + 1) + '</span><strong>' + ph.title + '</strong><p>' + ph.desc + '</p></div>';
+        });
+        html += '</div>';
+      }
+      // Worked Examples (real, properly explained examples)
+      if (d.examples && d.examples.length) {
+        html += '<div class="lesson-block lesson-examples"><h4>💡 Worked Examples</h4>';
+        d.examples.forEach(function (ex, i) {
+          html += '<div class="lesson-example"><span class="example-badge">Example ' + (i + 1) + '</span>';
+          if (ex.title) html += '<strong>' + ex.title + '</strong>';
+          if (ex.description) html += '<p>' + ex.description + '</p>';
+          if (ex.steps && ex.steps.length) {
+            html += '<ol class="example-steps">';
+            ex.steps.forEach(function (s) { html += '<li>' + s + '</li>'; });
+            html += '</ol>';
+          }
+          if (ex.code) html += '<pre class="lesson-code"><code>' + ex.code + '</code></pre>';
+          if (ex.output) html += '<div class="example-output">📤 ' + ex.output + '</div>';
+          if (ex.explanation) html += '<div class="example-explanation">🔍 ' + ex.explanation + '</div>';
+          html += '</div>';
+        });
+        html += '</div>';
+      }
+      if (d.keyPoints && d.keyPoints.length) {
+        html += '<div class="lesson-block lesson-keypoints"><h4>🔑 Key Takeaways</h4><ul>';
+        d.keyPoints.forEach(function (k) { html += '<li>' + k + '</li>'; });
+        html += '</ul></div>';
+      }
+      if (d.summary) html += '<div class="lesson-summary">📘 ' + d.summary + '</div>';
+      return html;
+    }
+
+    function renderLesson() {
+      const course = getCourseById(currentCourseId);
+      if (!course) return;
+      const lesson = course.lessons[currentLesson];
+      const done = isLessonCompleted(currentCourseId, currentLesson);
+      const quizScore = getCourseProgress(currentCourseId).quizScores[currentLesson];
+      
+      const container = document.getElementById('lessonContent');
+      container.innerHTML = `
+        <div class="lesson-header">
+          <span class="lesson-badge">Lesson ${currentLesson + 1} of ${course.lessons.length}</span>
+          <h3>${lesson.title}</h3>
+        </div>
+        <div class="lesson-theory">
+          <h4>📖 Theory</h4>
+          ${renderLessonDetail(lesson)}
+        </div>
+        <div class="lesson-quiz">
+          <h4>🧠 Quick Quiz</h4>
+          ${quizScore ? `<div class="quiz-score-banner">Your last score: ${quizScore.score}/${quizScore.total} ${quizScore.score >= quizScore.total * 0.6 ? '✅' : '📖 Try again'}</div>` : ''}
+          ${lesson.quiz.map((q, qi) => `
+            <div class="quiz-question" data-question="${qi}">
+              <p class="quiz-q-text"><strong>Q${currentLesson + qi + 1}.</strong> ${escapeHtml(q.q)}</p>
+              <div class="quiz-options">
+                ${q.options.map((opt, i) => `
+                  <button class="quiz-option" onclick="selectQuizAnswer(${qi}, ${i})" data-q="${qi}" data-opt="${i}">${String.fromCharCode(65 + i)}. ${escapeHtml(opt)}</button>
+                `).join('')}
+              </div>
+            </div>
+          `).join('')}
+          <div style="display:flex; gap:12px; justify-content:flex-end; margin-top:20px;">
+            <button class="btn btn-primary" onclick="submitQuiz()" id="submitQuizBtn">Submit Quiz</button>
+            <button class="btn btn-secondary" onclick="resetQuiz()" id="resetQuizBtn" style="display:none;">↺ Try Again</button>
+          </div>
+          <div id="quizResult" style="margin-top:16px;"></div>
+        </div>
+      `;
+      
+      // Update lesson list active state
+      document.querySelectorAll('.course-lesson-item').forEach((el, i) => {
+        el.classList.toggle('active', i === currentLesson);
+      });
+    }
+
+    function selectLesson(index) {
+      const course = getCourseById(currentCourseId);
+      if (!course) return;
+      // Allow navigation but track state
+      currentLesson = index;
+      quizAnswers = [];
+      quizSubmitted = false;
+      renderLesson();
+      document.querySelector('.course-content-wrap').scrollIntoView({behavior:'smooth'});
+    }
+
+    function selectQuizAnswer(questionIndex, optionIndex) {
+      quizAnswers[questionIndex] = optionIndex;
+      document.querySelectorAll(`.quiz-option[data-q="${questionIndex}"]`).forEach((el, i) => {
+        el.classList.toggle('selected', i === optionIndex);
+      });
+    }
+
+    function submitQuiz() {
+      const course = getCourseById(currentCourseId);
+      if (!course) return;
+      const lesson = course.lessons[currentLesson];
+      const total = lesson.quiz.length;
+      
+      if (quizAnswers.length < total) {
+        showToast('Please answer all questions before submitting.');
+        return;
+      }
+      
+      // Grade each answer and collect per-question feedback
+      let score = 0;
+      const feedback = lesson.quiz.map((q, i) => {
+        const chosen = quizAnswers[i];
+        const correct = chosen === q.answer;
+        if (correct) score++;
+        return {
+          correct,
+          chosen,
+          chosenText: q.options[chosen] || 'No selection',
+          rightText: q.options[q.answer],
+          q: q.q
+        };
+      });
+      
+      quizSubmitted = true;
+      const passed = score >= total * 0.6;
+      saveQuizScore(currentCourseId, currentLesson, score, total);
+      
+      const resultDiv = document.getElementById('quizResult');
+      let html = `<div class="quiz-result-banner ${passed ? 'pass' : 'fail'}">
+          <strong>Score: ${score}/${total}</strong> — ${passed ? '✅ Great job! Lesson completed! +20 XP' : '📖 Review the lesson and try again.'}
+      </div>`;
+      // Per-question detailed analysis with advice
+      feedback.forEach((f, i) => {
+        html += `<div class="quiz-q-feedback ${f.correct ? 'correct' : 'wrong'}">
+          <strong>Q${currentLesson + i + 1}.</strong> ${escapeHtml(f.q)}
+          <div class="feedback-detail">
+            ${f.correct
+              ? `✅ <strong>Correct!</strong> You chose "${escapeHtml(f.chosenText)}" — well done!`
+              : `❌ <strong>Not quite.</strong> You chose "${escapeHtml(f.chosenText)}". The correct answer is "<strong>${escapeHtml(f.rightText)}</strong>".`}
+          </div>
+          ${f.correct
+            ? `<div class="feedback-advice">💡 Tip: Keep this concept fresh by applying it in a small project or explaining it to someone else.</div>`
+            : `<div class="feedback-advice">📖 Advice: Re-read the theory section above and focus on why the correct answer makes sense. Then retry the quiz!</div>`}
+        </div>`;
+      });
+      if (!passed) {
+        html += `<div class="quiz-retry-advice">📚 <strong>You need at least ${Math.ceil(total * 0.6)} of ${total} to pass.</strong> Click <strong>"↺ Try Again"</strong> after reviewing the lesson — you've got this!</div>`;
+      }
+      resultDiv.innerHTML = html;
+      
+      // Show/hide retry + submit buttons
+      const resetBtn = document.getElementById('resetQuizBtn');
+      const submitBtn = document.getElementById('submitQuizBtn');
+      if (resetBtn) resetBtn.style.display = passed ? 'none' : 'inline-block';
+      if (submitBtn) submitBtn.style.display = passed ? 'none' : 'inline-block';
+      
+      // Disable answer changes and highlight correct/wrong choices
+      document.querySelectorAll('.quiz-option').forEach(el => {
+        el.disabled = true;
+        const qi = parseInt(el.dataset.q, 10);
+        const oi = parseInt(el.dataset.opt, 10);
+        if (oi === lesson.quiz[qi].answer) el.classList.add('correct-answer');
+        if (oi === quizAnswers[qi] && quizAnswers[qi] !== lesson.quiz[qi].answer) el.classList.add('wrong-answer');
+      });
+      
+      // Update lesson list completion markers WITHOUT resetting to lesson 1
+      document.querySelectorAll('.course-lesson-item').forEach((el, i) => {
+        if (isLessonCompleted(currentCourseId, i)) el.classList.add('done');
+      });
+    }
+
+    function resetQuiz() {
+      quizAnswers = [];
+      quizSubmitted = false;
+      const resultDiv = document.getElementById('quizResult');
+      if (resultDiv) resultDiv.innerHTML = '';
+      const resetBtn = document.getElementById('resetQuizBtn');
+      const submitBtn = document.getElementById('submitQuizBtn');
+      if (resetBtn) resetBtn.style.display = 'none';
+      if (submitBtn) submitBtn.style.display = 'inline-block';
+      renderLesson();
+    }
+
+    function openCertModal(courseId) {
+      const cert = state.certificates[courseId];
+      if (!cert) return;
+      const display = document.getElementById('certificateDisplay');
+      display.innerHTML = `
+        <div class="certificate-inner">
+          <div class="cert-logo">⚡ Skill Forge AI</div>
+          <div class="cert-title">CERTIFICATE OF COMPLETION</div>
+          <div class="cert-body">
+            <p>This certifies that</p>
+            <div class="cert-name">${state.user.name}</div>
+            <p>has successfully completed the course</p>
+            <div class="cert-course">${cert.courseTitle}</div>
+            <p>with distinction, demonstrating dedication to personal growth.</p>
+            <div class="cert-meta">
+              <div><span>Certificate Code</span><strong>${cert.code}</strong></div>
+              <div><span>Date</span><strong>${new Date(cert.earnedAt).toLocaleDateString()}</strong></div>
+            </div>
+          </div>
+        </div>
+      `;
+      document.getElementById('certModal').classList.add('open');
+    }
+
+    function closeCertModal() {
+      document.getElementById('certModal').classList.remove('open');
+    }
+
+    function downloadCertificate() {
+      window.print();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      renderCourse();
+      
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+      document.getElementById('authModal')?.addEventListener('click', function(e) { if (e.target === e.currentTarget) closeAuthModal(); });
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() { document.getElementById('navLinks').classList.toggle('open'); });
+      
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) { e.stopPropagation(); userDropdown.classList.toggle('open'); userAvatar.classList.toggle('open'); });
+        document.addEventListener('click', function() { userDropdown.classList.remove('open'); userAvatar.classList.remove('open'); });
+      }
+      
+      document.getElementById('certModal').addEventListener('click', function(e) {
+        if (e.target === e.currentTarget) closeCertModal();
+      });
+    });
+  </script>
+</body>
+</html>
+

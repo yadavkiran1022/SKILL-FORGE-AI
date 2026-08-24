@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Mentor Chat - Skill Forge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .chat-welcome {
+      text-align: center;
+      padding: 20px;
+      border-bottom: 1px solid var(--card-border);
+    }
+    .chat-welcome h3 {
+      font-size: 1rem;
+      color: var(--text-muted);
+      font-weight: 400;
+    }
+    .chat-welcome h3 strong {
+      color: var(--accent);
+    }
+    .suggestion-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      padding: 12px 20px;
+      border-top: 1px solid var(--card-border);
+      justify-content: center;
+    }
+    .suggestion-chip {
+      padding: 6px 14px;
+      border-radius: 50px;
+      border: 1px solid var(--glass-border);
+      background: var(--surface);
+      color: var(--text-secondary);
+      font-size: 0.8rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .suggestion-chip:hover {
+      border-color: var(--accent);
+      background: var(--badge-bg);
+      color: var(--accent);
+    }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><div class="logo-icon">⚡</div> Skill Forge AI</a>
+<ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html">Assess</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="creativity.html">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html">Habits</a></li>
+        <li><a href="chat.html" class="active">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="section" style="padding-top: 100px;">
+    <div class="section-header">
+      <span class="section-label">AI Mentor</span>
+      <h2>Chat with Your AI Mentor</h2>
+      <p>Ask questions, get advice, plan your learning journey — your AI mentor is always here.</p>
+    </div>
+    <div class="chat-container">
+      <div class="chat-box">
+        <div class="chat-welcome">
+          <h3>🧠 Ask me about <strong>skills</strong>, <strong>career</strong>, <strong>habits</strong>, <strong>speaking</strong>, or <strong>creativity</strong>!</h3>
+        </div>
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-msg bot">
+            <div class="avatar">🤖</div>
+            <div class="bubble">Hi! I'm your Skill Forge AI mentor. Ask me anything about skills, career, study plans, or personal growth!</div>
+          </div>
+        </div>
+        <div class="chat-input-area">
+          <input type="text" id="chatInput" placeholder="Type your message...">
+          <button class="send-btn" onclick="sendChatMessage()">➤</button>
+        </div>
+        <div class="suggestion-chips">
+          <span class="suggestion-chip" onclick="useSuggestion('What skills should I learn?')">💡 What skills should I learn?</span>
+          <span class="suggestion-chip" onclick="useSuggestion('How do I build better habits?')">🔥 How to build habits?</span>
+          <span class="suggestion-chip" onclick="useSuggestion('Help me with stage fright')">🎤 Stage fright help</span>
+          <span class="suggestion-chip" onclick="useSuggestion('Boost my creativity')">🎨 Boost creativity</span>
+          <span class="suggestion-chip" onclick="useSuggestion('Career advice for students')">🚀 Career advice</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>⚡ Skill Forge AI</h4><p style="color:var(--text-muted);font-size:0.9rem;">Your personal growth companion.</p></div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="assessment.html">Skill Assessment</a></li><li><a href="creativity.html">Creativity</a></li><li><a href="speaking.html">Speaking</a></li><li><a href="habits.html">Habits</a></li><li><a href="chat.html">AI Mentor</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">© 2025 Skill Forge AI</div>
+  </footer>
+
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    function sendChatMessage() {
+      const input = document.getElementById('chatInput');
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = '';
+
+      const messages = document.getElementById('chatMessages');
+      
+      // User message
+      const userMsg = document.createElement('div');
+      userMsg.className = 'chat-msg user';
+      userMsg.innerHTML = `<div class="avatar">🧑</div><div class="bubble">${escapeHtml(text)}</div>`;
+      messages.appendChild(userMsg);
+      messages.scrollTop = messages.scrollHeight;
+
+      state.chatCount++;
+      saveState();
+      checkBadges();
+
+      // Typing indicator
+      const typingMsg = document.createElement('div');
+      typingMsg.className = 'chat-msg bot typing';
+      typingMsg.innerHTML = `<div class="avatar">🤖</div><div class="bubble"><div class="typing-dots"><span></span><span></span><span></span></div></div>`;
+      messages.appendChild(typingMsg);
+      messages.scrollTop = messages.scrollHeight;
+
+      // Bot response with delay
+      setTimeout(() => {
+        typingMsg.remove();
+        const response = AIEngine.getResponse(text);
+        const botMsg = document.createElement('div');
+        botMsg.className = 'chat-msg bot';
+        botMsg.innerHTML = `<div class="avatar">🤖</div><div class="bubble">${response}</div>`;
+        messages.appendChild(botMsg);
+        messages.scrollTop = messages.scrollHeight;
+        updateAllUI();
+      }, 800 + Math.random() * 600);
+    }
+
+    function useSuggestion(text) {
+      document.getElementById('chatInput').value = text;
+      sendChatMessage();
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      AIEngine.init();
+
+      document.getElementById('chatInput').addEventListener('keydown', function(e) {
+        if (e.key === 'Enter') sendChatMessage();
+      });
+
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+      document.getElementById('authModal')?.addEventListener('click', function(e) { if (e.target === e.currentTarget) closeAuthModal(); });
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() { document.getElementById('navLinks').classList.toggle('open'); });
+
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) { e.stopPropagation(); userDropdown.classList.toggle('open'); userAvatar.classList.toggle('open'); });
+        document.addEventListener('click', function() { userDropdown.classList.remove('open'); userAvatar.classList.remove('open'); });
+      }
+    });
+  </script>
+</body>
+</html>
