@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Forge AI - Your Personal Growth Companion</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    /* Guest CTA shown in hero when not logged in */
+    .hero-glass-card .guest-cta {
+      text-align: center;
+      padding: 28px 20px;
+    }
+    .hero-glass-card .guest-cta-icon { font-size: 3rem; margin-bottom: 12px; }
+    .hero-glass-card .guest-cta h3 { font-size: 1.4rem; margin-bottom: 10px; }
+    .hero-glass-card .guest-cta p { color: var(--text-secondary); font-size: 0.95rem; margin-bottom: 20px; line-height: 1.7; }
+    .hero-glass-card .guest-cta .btn { justify-content: center; }
+    .guest-cta-note { font-size: 0.85rem !important; color: var(--text-muted) !important; margin-top: 14px !important; margin-bottom: 0 !important; }
+    .guest-cta-note .link-btn {
+      background: none;
+      border: none;
+      color: var(--accent);
+      font-weight: 600;
+      cursor: pointer;
+      font-size: inherit;
+      text-decoration: underline;
+      padding: 0;
+    }
+    .guest-cta-note .link-btn:hover { color: var(--accent-soft); }
+  </style>
+</head>
+<body>
+  <!-- ===== ANIMATED BACKGROUND ===== -->
+  <div class="bg-mesh">
+    <div class="orb"></div>
+    <div class="orb"></div>
+    <div class="orb"></div>
+  </div>
+
+  <!-- ===== XP TOAST ===== -->
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <!-- ===== HEADER / NAVIGATION ===== -->
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html">
+        <div class="logo-icon">⚡</div>
+        Skill Forge AI
+      </a>
+<ul class="nav-links" id="navLinks">
+        <li><a href="index.html" class="active">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html">Assess</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="creativity.html">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html">Habits</a></li>
+        <li><a href="chat.html">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle" aria-label="Toggle theme">🌙</button>
+        <!-- User avatar (shown after login) -->
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== LOGIN REQUIRED BANNER (shown after forced redirect) ===== -->
+  <div class="auth-required-banner" id="authRequiredBanner" style="display:none;">
+    <div class="auth-banner-content">
+      <span class="auth-banner-icon">🔒</span>
+      <div class="auth-banner-text">
+        <strong>Login required</strong>
+        <span>Please sign in and verify your email to access your progress and all Skill Forge features.</span>
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="openAuthModal()">Sign In</button>
+    </div>
+  </div>
+
+  <!-- ===== PROFILE PANEL (Quick View) ===== -->
+  <div class="profile-panel" id="profilePanel">
+    <div class="profile-avatar">🧑</div>
+    <h3 id="profileName">Explorer</h3>
+    <div class="profile-email" id="profileEmail">explorer@skillforge.ai</div>
+    <div class="profile-stat">
+      <span class="label">Level</span>
+      <span class="value" id="profileLevel">1</span>
+    </div>
+    <div class="profile-stat">
+      <span class="label">XP</span>
+      <span class="value" id="profileXP">0</span>
+    </div>
+    <div class="profile-stat">
+      <span class="label">Badges</span>
+      <span class="value" id="profileBadges">0</span>
+    </div>
+    <div class="profile-stat">
+      <span class="label">Streak</span>
+      <span class="value" id="profileStreak">0 days</span>
+    </div>
+    <div style="margin-top: 16px; display: flex; gap: 8px;">
+      <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="document.getElementById('profilePanel').classList.remove('open')">Close</button>
+      <button class="btn btn-danger btn-sm" style="flex:1;" onclick="resetAllData()">Reset</button>
+    </div>
+  </div>
+
+  <!-- ===== AUTH MODAL ===== -->
+  <div class="modal-overlay" id="authModal">
+    <div class="modal">
+      <button class="close-modal" onclick="closeAuthModal()">✕</button>
+      <h2>Welcome to Skill Forge</h2>
+      <p class="modal-subtitle" id="authSubtitle">Start your growth journey</p>
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login" onclick="switchAuthTab('login')">Login</button>
+        <button class="auth-tab" data-tab="register" onclick="switchAuthTab('register')">Register</button>
+      </div>
+      <div id="authForm">
+        <div class="form-group" id="nameField" style="display:none;">
+          <label>Full Name</label>
+          <input type="text" id="regName" placeholder="Enter your name">
+        </div>
+        <div class="form-group">
+          <label id="authIdentityLabel">User ID or Email</label>
+          <input type="text" id="authEmail" placeholder="Enter your user ID or email">
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="authPassword" placeholder="••••••••">
+        </div>
+<button class="btn-full" id="authSubmitBtn" onclick="handleAuth()">Let's Go</button>
+      </div>
+      <!-- Verification Step (shown after login/registration) -->
+      <div id="verifyStep" style="display:none;">
+        <div class="verify-title">📧 Verify Your Account</div>
+        <div class="verify-subtitle">We've emailed a 6-digit code to</div>
+        <div class="verify-dest">
+          <span>📨</span>
+          <span id="verifyDestLabel">your email</span>
+        </div>
+        <div id="verificationCodeNotice" style="display:none;"></div>
+        <input type="text" id="verifyCodeInput" class="verify-code-input" placeholder="000000" maxlength="6" inputmode="numeric">
+        <div class="verify-actions">
+          <button class="btn btn-primary" onclick="verifyCode()" style="flex:1;">Verify</button>
+          <button class="btn btn-secondary" id="resendCodeBtn" onclick="resendVerificationCode()" style="flex:1;">Resend Code</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== HERO SECTION ===== -->
+  <section class="hero" id="hero">
+    <div class="hero-content">
+      <div class="hero-text">
+        <div class="hero-badge">✨ AI-Powered Growth Platform</div>
+        <h1>
+          Build Skills.<br>
+          <span class="highlight">Boost Creativity.</span><br>
+          Become Your Best Self
+        </h1>
+        <p class="tagline">Your Personal Growth Companion</p>
+        <p class="subtext">
+          Skill Forge AI helps students discover their path — from overcoming skill confusion and building confidence, 
+          to mastering creativity, public speaking, and daily habits. <strong>No more wasted potential.</strong>
+        </p>
+        <div class="hero-buttons">
+          <button class="btn btn-primary" onclick="document.getElementById('problems').scrollIntoView({behavior:'smooth'})">Explore Solutions</button>
+          <button class="btn btn-secondary" onclick="window.location.href='chat.html'">Try AI Mentor →</button>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <div class="hero-glass-card glow-pulse" id="heroStatsCard">
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-icon">⚡</div>
+              <div class="stat-value" id="heroXP">0</div>
+              <div class="stat-label">Total XP</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">🏆</div>
+              <div class="stat-value" id="heroLevel">1</div>
+              <div class="stat-label">Level</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">🔥</div>
+              <div class="stat-value" id="heroStreak">0</div>
+              <div class="stat-label">Day Streak</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-icon">🎖️</div>
+              <div class="stat-value" id="heroBadges">0</div>
+              <div class="stat-label">Badges</div>
+            </div>
+          </div>
+          <div class="xp-bar">
+            <div class="xp-info">
+              <span>Progress to Level <span id="heroNextLevel">2</span></span>
+              <span id="heroXPProgress">0 / 100 XP</span>
+            </div>
+            <div class="xp-track">
+              <div class="xp-fill" id="heroXPFill" style="width: 0%;"></div>
+            </div>
+          </div>
+        </div>
+        <!-- Guest CTA (shown when not logged in instead of stats) -->
+        <div class="hero-glass-card glow-pulse" id="heroGuestCTA" style="display:none;">
+          <div class="guest-cta">
+            <div class="guest-cta-icon">🚀</div>
+            <h3>Start Your Growth Journey</h3>
+            <p>Sign in to track your XP, level, badges, and daily streaks. Your progress is saved as you learn.</p>
+            <button class="btn btn-primary" onclick="openAuthModal()">Get Started — It's Free</button>
+            <p class="guest-cta-note">Already have an account? <button class="link-btn" onclick="switchAuthTab('login'); openAuthModal();">Log in</button></p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== PROBLEMS WE SOLVE ===== -->
+  <section class="section" id="problems">
+    <div class="section-header">
+      <span class="section-label">Problems We Solve</span>
+      <h2>Struggles Every Student Faces</h2>
+      <p>We've identified the most common roadblocks — and built AI-powered solutions for each one.</p>
+    </div>
+    <div class="problems-grid">
+      <div class="problem-card">
+        <div class="problem-icon">🤷</div>
+        <h3>Don't Know Which Skills to Learn</h3>
+        <p class="problem-desc">Feeling lost with too many options? We help you find your path.</p>
+<div class="solution-reveal">
+          <div class="solution-content">
+            <strong>Solution:</strong> Take our <strong>Skill Assessment</strong> to discover your strengths and get personalized career roadmap recommendations.
+          </div>
+          <a href="assessment.html" class="explore-btn">Explore Solution →</a>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">😰</div>
+        <h3>Lack of Confidence in Speaking & Leadership</h3>
+        <p class="problem-desc">Stage fright holding you back? Build confidence step by step.</p>
+        <div class="solution-reveal">
+          <div class="solution-content">
+            <strong>Solution:</strong> Practice with our <strong>Public Speaking</strong> module — get topics, tips, and track your progress daily.
+          </div>
+          <a href="speaking.html" class="explore-btn">Explore Solution →</a>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">💡</div>
+        <h3>Struggle with Creativity & Critical Thinking</h3>
+        <p class="problem-desc">Can't think outside the box? Train your creative muscles.</p>
+        <div class="solution-reveal">
+          <div class="solution-content">
+            <strong>Solution:</strong> Take on <strong>Creativity Challenges</strong> with timers — from brainstorming to problem-solving exercises.
+          </div>
+          <a href="creativity.html" class="explore-btn">Explore Solution →</a>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📱</div>
+        <h3>Waste Time on Social Media</h3>
+        <p class="problem-desc">Scrolling endlessly? Replace distraction with growth.</p>
+        <div class="solution-reveal">
+          <div class="solution-content">
+            <strong>Solution:</strong> Use our <strong>Habit Tracker</strong> to build productive routines and earn XP for every positive habit.
+          </div>
+          <a href="habits.html" class="explore-btn">Explore Solution →</a>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">🎯</div>
+        <h3>Don't Receive Personalized Guidance</h3>
+        <p class="problem-desc">One-size-fits-all doesn't work. Get mentorship tailored to you.</p>
+        <div class="solution-reveal">
+          <div class="solution-content">
+            <strong>Solution:</strong> Chat with <strong>AI Mentor</strong> — get personalized advice, study plans, and career guidance 24/7.
+          </div>
+          <a href="chat.html" class="explore-btn">Explore Solution →</a>
+        </div>
+      </div>
+      <div class="problem-card">
+        <div class="problem-icon">📚</div>
+        <h3>Learn Theory but Don't Practice</h3>
+        <p class="problem-desc">Knowledge without action is just information. Start doing.</p>
+        <div class="solution-reveal">
+          <div class="solution-content">
+            <strong>Solution:</strong> Follow <strong>Career Roadmaps</strong> with actionable steps, skill assessments, and real-world projects.
+          </div>
+<a href="roadmaps.html" class="explore-btn">Explore Solution →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== FEATURES ===== -->
+  <section class="section" id="features">
+    <div class="section-header">
+      <span class="section-label">Tools</span>
+      <h2>Everything You Need to Grow</h2>
+      <p>Click any tool below to open its dedicated workspace — fully functional and ready to use.</p>
+    </div>
+    <div class="features-grid">
+      <a href="chat.html" class="feature-card">
+        <div class="feat-icon">🤖</div>
+        <h3>AI Mentor Chat</h3>
+        <p>Get personalized guidance, study plans, and instant answers from your AI mentor — available 24/7.</p>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="assessment.html" class="feature-card">
+        <div class="feat-icon">📊</div>
+        <h3>Skill Assessment</h3>
+        <p>Discover your strengths and areas for growth with interactive skill quizzes and detailed analytics.</p>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="creativity.html" class="feature-card">
+        <div class="feat-icon">🎨</div>
+        <h3>Creativity Challenges</h3>
+        <p>Boost your creative thinking with timed challenges, brainstorming exercises, and innovative problem-solving tasks.</p>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="speaking.html" class="feature-card">
+        <div class="feat-icon">🎤</div>
+        <h3>Public Speaking Practice</h3>
+        <p>Overcome stage fright with curated topics, speaking tips, and confidence-building exercises.</p>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="roadmaps.html" class="feature-card">
+        <div class="feat-icon">🗺️</div>
+        <h3>Career Roadmaps</h3>
+        <p>Follow clear, step-by-step career paths tailored to your interests and skill level.</p>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="habits.html" class="feature-card">
+        <div class="feat-icon">✅</div>
+        <h3>Daily Habit Tracker</h3>
+        <p>Build and maintain positive habits with streak tracking, daily reminders, and XP rewards.</p>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="dashboard.html" class="feature-card">
+        <div class="feat-icon">📈</div>
+        <h3>Progress Dashboard</h3>
+        <p>Track your growth with comprehensive analytics, visual progress bars, and achievement metrics.</p>
+        <span class="card-arrow">→</span>
+      </a>
+<a href="courses.html" class="feature-card">
+        <div class="feat-icon">📚</div>
+        <h3>Learning Hub</h3>
+        <p>Explore 50+ courses across 5 categories with theory lessons, in-between quizzes, and earn certificates upon completion.</p>
+        <span class="card-arrow">→</span>
+      </a>
+      <a href="profile.html" class="feature-card">
+        <div class="feat-icon">👤</div>
+        <h3>User Profile</h3>
+        <p>Your personal hub — manage your stats, view badges, track streaks, and customize your experience.</p>
+        <span class="card-arrow">→</span>
+      </a>
+    </div>
+  </section>
+
+  <!-- ===== FOOTER ===== -->
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col">
+        <h4>⚡ Skill Forge AI</h4>
+        <p style="color:var(--text-muted); font-size:0.9rem;">Your personal growth companion. Build skills, boost creativity, become your best self.</p>
+      </div>
+      <div class="footer-col">
+        <h4>Tools</h4>
+        <ul>
+          <li><a href="assessment.html">Skill Assessment</a></li>
+          <li><a href="creativity.html">Creativity Challenges</a></li>
+          <li><a href="speaking.html">Public Speaking</a></li>
+          <li><a href="roadmaps.html">Career Roadmaps</a></li>
+          <li><a href="habits.html">Habit Tracker</a></li>
+          <li><a href="chat.html">AI Mentor</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Account</h4>
+        <ul>
+          <li><a href="profile.html">My Profile</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+        </ul>
+      </div>
+      <div class="footer-col">
+        <h4>Connect</h4>
+        <ul>
+          <li><a href="#">Twitter</a></li>
+          <li><a href="#">GitHub</a></li>
+          <li><a href="#">Discord</a></li>
+          <li><a href="mailto:support@skillforge.ai">support@skillforge.ai</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      © 2025 Skill Forge AI — Built with ❤️ for students everywhere
+    </div>
+  </footer>
+
+  <!-- ===== SCRIPTS ===== -->
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    // Initialize
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      checkDailyReset();
+
+      // Theme toggle
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+      // Auth
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+
+      // If a protected page redirected here (login is required), open the
+      // login/verification modal automatically and show the banner.
+      const urlParams = new URLSearchParams(window.location.search);
+      if (urlParams.get('login') === 'required') {
+        switchAuthTab('login');
+        openAuthModal();
+        showToast('⚠️ Please log in and verify your email to continue.');
+        const banner = document.getElementById('authRequiredBanner');
+        if (banner) banner.style.display = 'flex';
+      } else if (state.user && state.user.isLoggedIn && !state.user.verified) {
+        // Logged in but not yet verified — prompt for verification.
+        switchAuthTab('login');
+        openAuthModal();
+      } else {
+        // Hide the banner on normal visits / after successful auth.
+        const banner = document.getElementById('authRequiredBanner');
+        if (banner) banner.style.display = 'none';
+      }
+      
+      // Close modals on overlay click
+      document.getElementById('authModal').addEventListener('click', function(e) {
+        if (e.target === e.currentTarget) closeAuthModal();
+      });
+
+      // User avatar dropdown
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) {
+          e.stopPropagation();
+          userDropdown.classList.toggle('open');
+          userAvatar.classList.toggle('open');
+        });
+        document.addEventListener('click', function() {
+          userDropdown.classList.remove('open');
+          userAvatar.classList.remove('open');
+        });
+      }
+
+// Profile button (for quick view panel)
+      // Since we now have userAvatar, make profileBtn optional
+      const profileBtn = document.getElementById('profileBtn');
+      if (profileBtn) {
+        profileBtn.addEventListener('click', function() {
+          const panel = document.getElementById('profilePanel');
+          if (panel) panel.classList.toggle('open');
+        });
+      }
+
+      // Mobile menu
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() {
+        document.getElementById('navLinks').classList.toggle('open');
+      });
+
+      // Close profile panel on click outside
+      document.addEventListener('click', function(e) {
+        const panel = document.getElementById('profilePanel');
+        if (panel && panel.classList.contains('open') && !panel.contains(e.target)) {
+          const btn = document.getElementById('profileBtn');
+          if (!btn || !btn.contains(e.target)) {
+            panel.classList.remove('open');
+          }
+        }
+      });
+
+      // Scroll animations
+      initScrollAnimations();
+    });
+
+    function checkDailyReset() {
+      const today = new Date().toDateString();
+      const lastReset = localStorage.getItem('skillforge_habit_reset');
+      if (lastReset !== today) {
+        state.habits.forEach(function(h) { h.completed = false; });
+        localStorage.setItem('skillforge_habit_reset', today);
+        saveState();
+      }
+    }
+
+    // Add keyboard support for auth modal Enter key
+    document.addEventListener('DOMContentLoaded', function() {
+      const authPassword = document.getElementById('authPassword');
+      if (authPassword) {
+        authPassword.addEventListener('keydown', function(e) {
+          if (e.key === 'Enter') handleAuth();
+        });
+      }
+    });
+  </script>
+</body>
+</html>
+
