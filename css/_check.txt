@@ -1,4 +1,4 @@
-﻿.quiz-score-banner {
+.quiz-score-banner {
 .quiz-result-banner {
 .quiz-result-banner.pass {
 .quiz-result-banner.fail {
