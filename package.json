@@ -1,0 +1,29 @@
+{
+  "name": "skill-forge-ai",
+  "version": "1.0.0",
+  "description": "Skill Forge AI - Personal Growth Platform with email verification backend",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "lan": "node server.js",
+    "public": "npm run start -- --tunnel"
+  },
+  "keywords": [
+    "learning",
+    "education",
+    "skill",
+    "growth",
+    "email-verification"
+  ],
+  "author": "Skill Forge AI",
+  "license": "MIT",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "localtunnel": "^2.0.2",
+    "mysql2": "^3.23.4",
+    "nodemailer": "^6.10.1"
+  }
+}

@@ -1,0 +1,590 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Career Roadmaps - Skill Forge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .roadmap-toolbar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-bottom: 28px;
+    }
+    .roadmap-toolbar input {
+      min-width: 260px;
+    }
+    .roadmap-overview {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .roadmap-overview-card {
+      padding: 20px;
+      border-radius: 18px;
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      cursor: pointer;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .roadmap-overview-card:hover {
+      transform: translateY(-4px);
+      border-color: var(--accent);
+    }
+    .roadmap-overview-card .rm-icon { font-size: 2.2rem; margin-bottom: 8px; }
+    .roadmap-overview-card h3 { font-size: 1.1rem; margin-bottom: 4px; }
+    .roadmap-overview-card .rm-sub { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 10px; }
+    .rm-pills { display: flex; gap: 6px; flex-wrap: wrap; }
+    .rm-pill {
+      font-size: 0.7rem;
+      padding: 3px 10px;
+      border-radius: 50px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+    }
+    .rm-level {
+      position: absolute;
+      top: 16px;
+      right: 16px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      padding: 3px 12px;
+      border-radius: 50px;
+      background: rgba(59,130,246,0.15);
+      color: var(--accent);
+    }
+    /* Flowchart */
+    .flowchart {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0;
+      margin: 20px 0 8px;
+      position: relative;
+    }
+    .flow-node {
+      padding: 12px 22px;
+      border-radius: 14px;
+      background: var(--surface);
+      border: 2px solid var(--card-border);
+      text-align: center;
+      min-width: 200px;
+      max-width: 300px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      position: relative;
+      z-index: 1;
+    }
+    .flow-node .fn-tag {
+      display: block;
+      font-size: 0.72rem;
+      font-weight: 500;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+    .flow-node.start { border-color: var(--accent); background: var(--badge-bg); }
+    .flow-node.mid { border-color: var(--card-border); }
+    .flow-node.end { border-color: #10b981; background: rgba(16,185,129,0.1); }
+    .flow-arrow {
+      width: 2px;
+      height: 26px;
+      background: var(--card-border);
+      position: relative;
+      z-index: 1;
+    }
+    .flow-arrow::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      border-left: 6px solid transparent;
+      border-right: 6px solid transparent;
+      border-top: 8px solid var(--card-border);
+    }
+    /* Checkable steps */
+    .rm-steps { margin-top: 18px; text-align: left; }
+    .rm-step {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+      margin-bottom: 8px;
+      cursor: pointer;
+      transition: background 0.2s ease, border-color 0.2s ease;
+      font-size: 0.9rem;
+    }
+    .rm-step:hover { border-color: var(--accent); }
+    .rm-step.done {
+      background: rgba(16,185,129,0.08);
+      border-color: rgba(16,185,129,0.4);
+    }
+    .rm-step .step-check {
+      width: 22px; height: 22px;
+      border-radius: 6px;
+      border: 2px solid var(--card-border);
+      display: grid;
+      place-items: center;
+      font-size: 0.75rem;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+    }
+    .rm-step.done .step-check { background: #10b981; border-color: #10b981; color: #fff; }
+    /* Graph / branching */
+    .graph-section { margin: 28px 0; }
+    .graph-nodes {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin-top: 16px;
+    }
+    .graph-node {
+      width: 150px;
+      padding: 16px 10px;
+      border-radius: 14px;
+      border: 2px dashed var(--card-border);
+      text-align: center;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      background: var(--surface);
+    }
+    .graph-node .gn-icon { font-size: 1.8rem; margin-bottom: 6px; display: block; }
+    .graph-node strong { color: var(--text-primary); display: block; font-size: 0.9rem; margin-bottom: 4px; }
+    .roadmap-detail {
+      display: none;
+      margin-top: 28px;
+      padding: 28px;
+      border-radius: 20px;
+      background: var(--surface);
+      border: 1px solid var(--card-border);
+    }
+    .roadmap-detail.open { display: block; }
+    .rm-detail-header { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+    .rm-detail-header .rm-icon { font-size: 2.6rem; }
+    .rm-detail-header h2 { font-size: 1.6rem; margin: 0; }
+    .rm-salary {
+      font-size: 0.85rem;
+      padding: 6px 14px;
+      border-radius: 50px;
+      background: rgba(16,185,129,0.12);
+      color: #10b981;
+      font-weight: 700;
+    }
+    .rm-detail-desc { color: var(--text-secondary); margin-bottom: 16px; max-width: 720px; line-height: 1.7; }
+    .rm-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+      margin-top: 16px;
+    }
+    @media (max-width: 768px) { .rm-grid-2 { grid-template-columns: 1fr; } }
+    .rm-panel h4 { margin-bottom: 12px; font-size: 1rem; }
+    .no-results { color: var(--text-muted); text-align: center; padding: 40px; grid-column: 1 / -1; }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><div class="logo-icon">⚡</div> Skill Forge AI</a>
+<ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html">Assess</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="creativity.html">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html">Habits</a></li>
+        <li><a href="chat.html">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="section" style="padding-top: 100px;">
+    <div class="section-header">
+      <span class="section-label">Career Roadmaps</span>
+      <h2>Your Future, Planned Out</h2>
+      <p>Explore 10+ career paths with visual flowcharts, salary insights, and checkable step-by-step plans.</p>
+    </div>
+
+    <!-- Search + Filter -->
+    <div class="roadmap-toolbar">
+      <input type="text" id="roadmapSearch" class="form-input" placeholder="🔍 Search careers (e.g. web, data, design...)">
+      <select id="roadmapLevelFilter" class="form-input" style="max-width:180px;">
+        <option value="all">All Levels</option>
+        <option value="Beginner">Beginner</option>
+        <option value="Intermediate">Intermediate</option>
+        <option value="Advanced">Advanced</option>
+      </select>
+    </div>
+
+    <!-- Overview Cards -->
+    <div class="roadmap-overview" id="roadmapOverview"></div>
+
+    <!-- Detail Panel -->
+    <div class="roadmap-detail" id="roadmapDetail"></div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>⚡ Skill Forge AI</h4><p style="color:var(--text-muted);font-size:0.9rem;">Your personal growth companion.</p></div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="assessment.html">Skill Assessment</a></li><li><a href="creativity.html">Creativity</a></li><li><a href="speaking.html">Speaking</a></li><li><a href="habits.html">Habits</a></li><li><a href="chat.html">AI Mentor</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">© 2025 Skill Forge AI</div>
+  </footer>
+
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    // =============================================
+    // CAREER ROADMAPS - 10 Paths with Flowcharts
+    // =============================================
+    const ROADMAPS = [
+      {
+        id: 'web', icon: '💻', title: 'Web Developer', sub: 'Frontend → Full Stack',
+        level: 'Beginner', salary: '$60k – $130k', time: '6–12 months',
+        desc: 'Build websites and web apps. One of the most in-demand skills with endless freelance and remote opportunities.',
+        tags: ['HTML', 'CSS', 'JavaScript', 'React', 'Node.js'],
+        steps: ['Learn HTML & CSS fundamentals', 'Master JavaScript (variables, DOM, events)', 'Build 5 practice projects', 'Learn a framework (React)', 'Backend basics with Node.js + databases', 'Build a portfolio & deploy on GitHub Pages', 'Apply to internships / freelance gigs'],
+        flow: [
+          { label: 'HTML & CSS', tag: 'Structure & Style', type: 'start' },
+          { label: 'JavaScript', tag: 'Make it interactive', type: 'mid' },
+          { label: 'React / Frameworks', tag: 'Modern UI apps', type: 'mid' },
+          { label: 'Node.js + Database', tag: 'Backend logic', type: 'mid' },
+          { label: 'Portfolio & Deploy', tag: 'Show your work', type: 'end' }
+        ],
+        options: ['Frontend Dev', 'Backend Dev', 'Full Stack Dev', 'Mobile Dev (React Native)', 'Freelance Web Dev'],
+        resources: ['MDN Web Docs', 'freeCodeCamp', 'The Odin Project', 'Frontend Mentor']
+      },
+      {
+        id: 'ux', icon: '🎨', title: 'UI/UX Designer', sub: 'Design Thinking → Product Design',
+        level: 'Beginner', salary: '$55k – $120k', time: '6–9 months',
+        desc: 'Design user-friendly digital products. Blend psychology, aesthetics, and usability to shape how people experience apps and websites.',
+        tags: ['Figma', 'Wireframing', 'User Research', 'Prototyping'],
+        steps: ['Learn design principles & color theory', 'Master Figma & design tools', 'Study UX research methods (interviews, surveys)', 'Create wireframes & prototypes', 'Build 3 case studies', 'Compile a portfolio on Behance/Dribbble', 'Apply for junior designer roles'],
+        flow: [
+          { label: 'Design Basics', tag: 'Principles & color', type: 'start' },
+          { label: 'Figma Mastery', tag: 'Wireframes & mockups', type: 'mid' },
+          { label: 'User Research', tag: 'Know your users', type: 'mid' },
+          { label: 'Case Studies', tag: '3 real projects', type: 'mid' },
+          { label: 'Portfolio & Apply', tag: 'Launch your career', type: 'end' }
+        ],
+        options: ['Product Designer', 'UX Researcher', 'Interaction Designer', 'Visual Designer', 'Design Systems Specialist'],
+        resources: ['Figma', 'Google UX Certificate', 'NN/g Nielsen Norman Group', 'Dribbble']
+      },
+      {
+        id: 'data', icon: '📊', title: 'Data Scientist', sub: 'Analysis → Machine Learning',
+        level: 'Intermediate', salary: '$80k – $150k', time: '9–12 months',
+        desc: 'Turn raw data into powerful insights. Use statistics, Python, and machine learning to drive decisions in every industry.',
+        tags: ['Python', 'SQL', 'Statistics', 'Machine Learning', 'Pandas'],
+        steps: ['Learn Python & SQL basics', 'Master statistics & probability', 'Data analysis with Pandas & NumPy', 'Data visualization (Matplotlib/Seaborn)', 'Machine learning fundamentals', 'Build a Kaggle project portfolio', 'Prepare for data science interviews'],
+        flow: [
+          { label: 'Python + SQL', tag: 'Foundation', type: 'start' },
+          { label: 'Statistics', tag: 'Understand data', type: 'mid' },
+          { label: 'Pandas & Viz', tag: 'Analyze & visualize', type: 'mid' },
+          { label: 'Machine Learning', tag: 'Predict & classify', type: 'mid' },
+          { label: 'Portfolio + Apply', tag: 'Real datasets', type: 'end' }
+        ],
+        options: ['Data Analyst', 'Data Scientist', 'ML Engineer', 'Business Intelligence', 'AI Researcher'],
+        resources: ['Kaggle', 'Coursera ML Course', 'StatQuest', 'StrataScratch']
+      },
+      {
+        id: 'entre', icon: '🚀', title: 'Entrepreneur', sub: 'Idea → Startup',
+        level: 'Beginner', salary: 'Unlimited potential', time: 'Ongoing',
+        desc: 'Build your own business. Learn to validate ideas, create products customers love, and scale sustainably.',
+        tags: ['Validation', 'MVP', 'Marketing', 'Sales', 'Pitching'],
+        steps: ['Find & validate a real problem', 'Interview 20+ potential customers', 'Build a Minimum Viable Product (MVP)', 'Learn marketing & sales basics', 'Network & find mentors', 'Launch & gather feedback', 'Iterate and scale'],
+        flow: [
+          { label: 'Find Problem', tag: 'Validate with users', type: 'start' },
+          { label: 'Build MVP', tag: 'Simplest solution', type: 'mid' },
+          { label: 'Launch & Learn', tag: 'Real feedback', type: 'mid' },
+          { label: 'Marketing + Sales', tag: 'Get customers', type: 'mid' },
+          { label: 'Scale & Grow', tag: 'Build your startup', type: 'end' }
+        ],
+        options: ['SaaS Founder', 'E-commerce', 'Freelance Business', 'Consulting', 'Social Enterprise'],
+        resources: ['Y Combinator Startup School', 'Lean Startup (Book)', 'Indie Hackers', 'Steve Blank']
+      },
+      {
+        id: 'mobile', icon: '📱', title: 'Mobile App Developer', sub: 'Android + iOS',
+        level: 'Intermediate', salary: '$70k – $140k', time: '8–12 months',
+        desc: 'Build apps for smartphones using modern cross-platform tools. The mobile app market continues to explode.',
+        tags: ['Flutter', 'React Native', 'Kotlin', 'Swift'],
+        steps: ['Learn programming basics (Dart/JS/Kotlin)', 'Understand mobile UI patterns', 'Master a cross-platform framework (Flutter/RN)', 'Work with APIs & local databases', 'Build & publish 2 apps to stores', 'Optimize for performance', 'Build an app portfolio'],
+        flow: [
+          { label: 'Programming Basics', tag: 'Logic & syntax', type: 'start' },
+          { label: 'UI Patterns', tag: 'Mobile-first design', type: 'mid' },
+          { label: 'Flutter / RN', tag: 'Build cross-platform', type: 'mid' },
+          { label: 'APIs + Databases', tag: 'Connect & store', type: 'mid' },
+          { label: 'Publish 2 Apps', tag: 'App Store + Play Store', type: 'end' }
+        ],
+        options: ['Android Dev', 'iOS Dev', 'Cross-platform Dev', 'Game Dev (mobile)', 'AR/VR Dev'],
+        resources: ['Flutter Docs', 'React Native Docs', 'Google Codelabs', 'Udemy Courses']
+      },
+      {
+        id: 'cloud', icon: '☁️', title: 'Cloud / DevOps Engineer', sub: 'Infrastructure → Automation',
+        level: 'Intermediate', salary: '$85k – $160k', time: '8–12 months',
+        desc: 'Design, deploy, and automate cloud infrastructure. Every modern company needs DevOps and cloud skills.',
+        tags: ['AWS', 'Docker', 'Kubernetes', 'CI/CD', 'Linux'],
+        steps: ['Learn Linux & networking basics', 'Understand virtualization & containers (Docker)', 'Master a cloud platform (AWS/Azure/GCP)', 'Learn CI/CD pipelines', 'Automation with Terraform & Ansible', 'Kubernetes orchestration', 'Get cloud certifications & apply'],
+        flow: [
+          { label: 'Linux + Networking', tag: 'Foundation', type: 'start' },
+          { label: 'Docker', tag: 'Containers', type: 'mid' },
+          { label: 'AWS / Cloud', tag: 'Scalable infra', type: 'mid' },
+          { label: 'CI/CD + IaC', tag: 'Automate everything', type: 'mid' },
+          { label: 'K8s + Certify', tag: 'Orchestrate & prove', type: 'end' }
+        ],
+        options: ['Cloud Engineer', 'DevOps Engineer', 'Site Reliability Engineer', 'Platform Engineer', 'Solutions Architect'],
+        resources: ['AWS Skill Builder', 'Docker Docs', 'Kubernetes Docs', 'A Cloud Guru']
+      },
+      {
+        id: 'cyber', icon: '🔐', title: 'Cybersecurity Analyst', sub: 'Defense → Offense',
+        level: 'Intermediate', salary: '$75k – $150k', time: '8–12 months',
+        desc: 'Protect organizations from cyber threats. A field with a massive talent shortage and strong job security.',
+        tags: ['Networking', 'Ethical Hacking', 'SIEM', 'Python'],
+        steps: ['Learn networking fundamentals', 'Understand OS & system administration', 'Learn security basics (CIA triad, threats)', 'Master a SIEM tool (Splunk) & log analysis', 'Study ethical hacking (Kali, Nmap, Wireshark)', 'Earn certifications (Security+, CEH)', 'Practice on TryHackMe & apply'],
+        flow: [
+          { label: 'Networking + OS', tag: 'Foundation', type: 'start' },
+          { label: 'Security Basics', tag: 'Threats & defenses', type: 'mid' },
+          { label: 'SIEM + Logs', tag: 'Detect attacks', type: 'mid' },
+          { label: 'Ethical Hacking', tag: 'Think like attackers', type: 'mid' },
+          { label: 'Certify + Apply', tag: 'Security+ & jobs', type: 'end' }
+        ],
+        options: ['Security Analyst', 'Penetration Tester', 'SOC Analyst', 'Security Engineer', 'Forensics'],
+        resources: ['TryHackMe', 'HackTheBox', 'CompTIA Security+', 'Professor Messer']
+      },
+      {
+        id: 'marketing', icon: '📣', title: 'Digital Marketer', sub: 'SEO → Growth',
+        level: 'Beginner', salary: '$45k – $100k', time: '4–8 months',
+        desc: 'Drive growth for brands through SEO, content, social media, and paid advertising. Highly creative + analytical.',
+        tags: ['SEO', 'Content', 'Social Media', 'Google Ads', 'Analytics'],
+        steps: ['Learn marketing fundamentals & funnel', 'Master SEO (keywords, on-page, backlinks)', 'Content marketing & copywriting', 'Social media marketing strategy', 'Paid ads (Google/Meta) & A/B testing', 'Track with Google Analytics', 'Build a portfolio of campaigns'],
+        flow: [
+          { label: 'Marketing Basics', tag: 'Funnel & strategy', type: 'start' },
+          { label: 'SEO + Content', tag: 'Get found', type: 'mid' },
+          { label: 'Social Media', tag: 'Engage audiences', type: 'mid' },
+          { label: 'Paid Ads', tag: 'Scale with ads', type: 'mid' },
+          { label: 'Analytics + Apply', tag: 'Measure & grow', type: 'end' }
+        ],
+        options: ['SEO Specialist', 'Content Marketer', 'Social Media Manager', 'Growth Marketer', 'Email Marketer'],
+        resources: ['Google Digital Garage', 'HubSpot Academy', 'SEMrush Academy', 'Ahrefs Blog']
+      },
+      {
+        id: 'ai', icon: '🤖', title: 'AI / ML Engineer', sub: 'ML → Deep Learning',
+        level: 'Advanced', salary: '$95k – $180k', time: '12+ months',
+        desc: 'Build intelligent systems. The hottest field in tech — from chatbots to computer vision to autonomous systems.',
+        tags: ['Python', 'TensorFlow', 'PyTorch', 'NLP', 'Deep Learning'],
+        steps: ['Strong Python + math (linear algebra, calculus)', 'Master data structures & algorithms', 'Classical ML (regression, trees, clustering)', 'Deep learning (neural networks, CNNs, RNNs)', 'NLP & transformers (LLMs)', 'MLOps (deploy & monitor models)', 'Build AI portfolio projects & apply'],
+        flow: [
+          { label: 'Python + Math', tag: 'Foundation', type: 'start' },
+          { label: 'Classical ML', tag: 'Core algorithms', type: 'mid' },
+          { label: 'Deep Learning', tag: 'Neural networks', type: 'mid' },
+          { label: 'NLP + LLMs', tag: 'Language AI', type: 'mid' },
+          { label: 'MLOps + Apply', tag: 'Ship AI products', type: 'end' }
+        ],
+        options: ['ML Engineer', 'AI Researcher', 'NLP Engineer', 'Computer Vision Eng', 'LLM/AI App Developer'],
+        resources: ['DeepLearning.AI', 'Fast.ai', 'Hugging Face', 'arXiv Papers']
+      },
+      {
+        id: 'finance', icon: '💰', title: 'Finance / FinTech', sub: 'Analyst → Investor',
+        level: 'Intermediate', salary: '$60k – $150k', time: '6–12 months',
+        desc: 'Master money — investing, financial modeling, and the fast-growing fintech industry.',
+        tags: ['Excel', 'Financial Modeling', 'Investing', 'FinTech'],
+        steps: ['Learn accounting & finance fundamentals', 'Master Excel & financial modeling', 'Understand investing (stocks, bonds, funds)', 'Learn fintech (payments, blockchain, apps)', 'Python for finance & data analysis', 'Get a certification (CFA level 1 / FMVA)', 'Build a financial portfolio & apply'],
+        flow: [
+          { label: 'Finance Basics', tag: 'Accounting & money', type: 'start' },
+          { label: 'Excel + Modeling', tag: 'Analyze numbers', type: 'mid' },
+          { label: 'Investing', tag: 'Grow wealth', type: 'mid' },
+          { label: 'FinTech + Python', tag: 'Tech meets finance', type: 'mid' },
+          { label: 'Certify + Apply', tag: 'Launch your career', type: 'end' }
+        ],
+        options: ['Financial Analyst', 'Investment Banker', 'FinTech Product Manager', 'Quant Analyst', 'Wealth Advisor'],
+        resources: ['Investopedia', 'CFA Institute', 'Corporate Finance Institute', 'Wall Street Prep']
+      }
+    ];
+
+    let activeSearch = '';
+    let activeLevel = 'all';
+    const ROADMAP_STEPS_KEY = 'skillforge_roadmap_steps';
+
+    function getDoneSteps(id) {
+      const all = JSON.parse(localStorage.getItem(ROADMAP_STEPS_KEY) || '{}');
+      return all[id] || [];
+    }
+
+    function saveStep(id, index, done) {
+      const all = JSON.parse(localStorage.getItem(ROADMAP_STEPS_KEY) || '{}');
+      if (!all[id]) all[id] = [];
+      if (done) { if (!all[id].includes(index)) all[id].push(index); }
+      else { all[id] = all[id].filter(i => i !== index); }
+      localStorage.setItem(ROADMAP_STEPS_KEY, JSON.stringify(all));
+    }
+
+    function getFiltered() {
+      const term = activeSearch.toLowerCase();
+      return ROADMAPS.filter(r => {
+        const matchLevel = activeLevel === 'all' || r.level === activeLevel;
+        const matchTerm = !term ||
+          r.title.toLowerCase().includes(term) ||
+          r.sub.toLowerCase().includes(term) ||
+          r.tags.some(t => t.toLowerCase().includes(term)) ||
+          r.options.some(o => o.toLowerCase().includes(term));
+        return matchLevel && matchTerm;
+      });
+    }
+
+    function renderOverview() {
+      const container = document.getElementById('roadmapOverview');
+      const filtered = getFiltered();
+      if (filtered.length === 0) {
+        container.innerHTML = '<div class="no-results">No careers match your search. Try another keyword.</div>';
+        return;
+      }
+      container.innerHTML = filtered.map(r => `
+        <div class="roadmap-overview-card" onclick="openRoadmap('${r.id}')">
+          <span class="rm-level">${r.level}</span>
+          <div class="rm-icon">${r.icon}</div>
+          <h3>${r.title}</h3>
+          <div class="rm-sub">${r.sub}</div>
+          <div class="rm-pills">${r.tags.slice(0, 3).map(t => `<span class="rm-pill">${t}</span>`).join('')}</div>
+        </div>
+      `).join('');
+    }
+
+    function openRoadmap(id) {
+      const r = ROADMAPS.find(x => x.id === id);
+      if (!r) return;
+      const detail = document.getElementById('roadmapDetail');
+      const doneSteps = getDoneSteps(id);
+
+      // Flowchart
+      const flowHtml = `<div class="flowchart">
+        ${r.flow.map((f, i) => `
+          ${i > 0 ? '<div class="flow-arrow"></div>' : ''}
+          <div class="flow-node ${f.type}">${f.label}<span class="fn-tag">${f.tag}</span></div>
+        `).join('')}
+      </div>`;
+
+      // Steps checklist
+      const stepsHtml = `<div class="rm-steps">
+        ${r.steps.map((s, i) => `
+          <div class="rm-step ${doneSteps.includes(i) ? 'done' : ''}" onclick="toggleStep('${r.id}', ${i}, this)">
+            <span class="step-check">${doneSteps.includes(i) ? '✓' : ''}</span>
+            <span>${s}</span>
+          </div>
+        `).join('')}
+      </div>`;
+
+      // Options graph
+      const graphHtml = `<div class="graph-section">
+        <h4>🧭 Career Options After This Path</h4>
+        <div class="graph-nodes">
+          ${r.options.map(o => `<div class="graph-node"><span class="gn-icon">📌</span><strong>${o}</strong></div>`).join('')}
+        </div>
+      </div>`;
+
+      // Resources
+      const resHtml = `<div class="rm-panel" style="margin-top:8px;">
+        <h4>🔗 Recommended Resources</h4>
+        <div class="rm-pills">${r.resources.map(res => `<span class="rm-pill">${res}</span>`).join('')}</div>
+      </div>`;
+
+      detail.innerHTML = `
+        <div class="rm-detail-header">
+          <div class="rm-icon">${r.icon}</div>
+          <div style="flex:1; min-width:220px;">
+            <h2>${r.title}</h2>
+            <div class="rm-sub" style="font-size:0.9rem;">${r.sub}</div>
+          </div>
+          <span class="rm-salary">💰 ${r.salary}</span>
+        </div>
+        <p class="rm-detail-desc">${r.desc}</p>
+        <div class="rm-pills" style="margin-bottom:8px;">${r.tags.map(t => `<span class="rm-pill">${t}</span>`).join('')}</div>
+
+        <div class="rm-grid-2">
+          <div class="rm-panel">
+            <h4>🗺️ Visual Flowchart</h4>
+            ${flowHtml}
+          </div>
+          <div class="rm-panel">
+            <h4>✅ Step-by-Step Plan <span style="font-weight:400; color:var(--text-muted); font-size:0.8rem;">(click to check off)</span></h4>
+            ${stepsHtml}
+          </div>
+        </div>
+
+        ${graphHtml}
+        ${resHtml}
+        <div style="display:flex; gap:12px; margin-top:20px; flex-wrap:wrap;">
+          <button class="btn btn-secondary btn-sm" onclick="document.getElementById('roadmapDetail').classList.remove('open'); document.getElementById('roadmapDetail').scrollIntoView({behavior:'smooth'});">Close</button>
+          <button class="btn btn-primary btn-sm" onclick="window.location.href='courses.html'">📚 Find Matching Courses</button>
+          <button class="btn btn-secondary btn-sm" onclick="window.location.href='chat.html'">💬 Discuss with AI Mentor</button>
+        </div>
+      `;
+      detail.classList.add('open');
+      detail.scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function toggleStep(id, index, el) {
+      const nowDone = !el.classList.contains('done');
+      el.classList.toggle('done', nowDone);
+      el.querySelector('.step-check').textContent = nowDone ? '✓' : '';
+      saveStep(id, index, nowDone);
+      showToast(nowDone ? '✅ Step completed! +5 XP' : 'Step unchecked');
+      if (nowDone) addXP(5);
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      renderOverview();
+
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+      document.getElementById('authModal')?.addEventListener('click', function(e) { if (e.target === e.currentTarget) closeAuthModal(); });
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() { document.getElementById('navLinks').classList.toggle('open'); });
+      document.getElementById('roadmapSearch').addEventListener('input', function(e) { activeSearch = e.target.value; renderOverview(); });
+      document.getElementById('roadmapLevelFilter').addEventListener('change', function(e) { activeLevel = e.target.value; renderOverview(); });
+
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) { e.stopPropagation(); userDropdown.classList.toggle('open'); userAvatar.classList.toggle('open'); });
+        document.addEventListener('click', function() { userDropdown.classList.remove('open'); userAvatar.classList.remove('open'); });
+      }
+    });
+  </script>
+</body>
+</html>
+

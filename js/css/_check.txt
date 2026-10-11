@@ -1,0 +1,42 @@
+﻿.quiz-score-banner {
+.quiz-result-banner {
+.quiz-result-banner.pass {
+.quiz-result-banner.fail {
+.lesson-theory .lesson-intro {
+.lesson-theory .lesson-block {
+.lesson-theory .lesson-block h4 {
+.lesson-theory .lesson-block p {
+.lesson-theory .lesson-block ul {
+.lesson-theory .lesson-block ul li { margin-bottom: 6px; }
+.lesson-theory .lesson-block ul li::marker { color: var(--accent); }
+.lesson-theory .lesson-keypoints {
+.lesson-theory .lesson-keypoints h4 { color: var(--badge-text); }
+.lesson-theory .lesson-keypoints ul li::marker { content: '🔑 '; color: var(--accent); }
+.lesson-theory .lesson-code {
+html[data-theme="light"] .lesson-theory .lesson-code { background: #f6f8fa; color: #24292e; }
+.lesson-theory .lesson-summary {
+.lesson-theory .lesson-summary strong { color: #10b981; }
+.lesson-theory .lesson-block strong { color: var(--text-primary); }
+.quiz-q-feedback {
+.quiz-q-feedback.correct {
+.quiz-q-feedback.wrong {
+.quiz-q-feedback .feedback-detail {
+.quiz-q-feedback .feedback-detail strong { color: var(--text-primary); }
+.quiz-q-feedback .feedback-advice {
+.quiz-option.correct-answer {
+.quiz-option.wrong-answer {
+.lesson-theory .lesson-phases h4,
+.lesson-theory .lesson-examples h4 { color: var(--accent); }
+.lesson-phase {
+.lesson-phase .phase-badge {
+.lesson-phase strong {
+.lesson-phase p {
+.lesson-phase ul {
+.lesson-example {
+.lesson-example .example-badge {
+.lesson-example strong {
+.lesson-example p {
+.lesson-example .example-steps {
+.lesson-example .example-steps li::marker { color: #8b5cf6; }
+.lesson-example .example-output {
+.lesson-example .example-explanation {

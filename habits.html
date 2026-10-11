@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker - Skill Forge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><div class="logo-icon">⚡</div> Skill Forge AI</a>
+<ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html">Assess</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="creativity.html">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html" class="active">Habits</a></li>
+        <li><a href="chat.html">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="section" style="padding-top: 100px;">
+    <div class="section-header">
+      <span class="section-label">Habit Tracker</span>
+      <h2>Build Better Habits</h2>
+      <p>Track your daily routines, maintain streaks, and earn XP for consistency.</p>
+    </div>
+    <div class="habit-container">
+      <div class="habit-header">
+        <h3>📋 Today's Habits</h3>
+        <div class="streak">🔥 <span id="habitStreakCount">0</span> day streak</div>
+      </div>
+      <div class="habit-list" id="habitList"></div>
+      <div class="add-habit-form">
+        <input type="text" id="habitInput" placeholder="Add a new habit...">
+        <button class="btn btn-primary btn-sm" onclick="addHabit()">+ Add</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>⚡ Skill Forge AI</h4><p style="color:var(--text-muted);font-size:0.9rem;">Your personal growth companion.</p></div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="assessment.html">Skill Assessment</a></li><li><a href="creativity.html">Creativity</a></li><li><a href="speaking.html">Speaking</a></li><li><a href="habits.html">Habits</a></li><li><a href="chat.html">AI Mentor</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">© 2025 Skill Forge AI</div>
+  </footer>
+
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    function renderHabits() {
+      const container = document.getElementById('habitList');
+      container.innerHTML = '';
+      state.habits.forEach(habit => {
+        const div = document.createElement('div');
+        div.className = 'habit-item' + (habit.completed ? ' completed' : '');
+        div.innerHTML = `
+          <div class="habit-check" onclick="toggleHabit('${habit.id}')">
+            <span class="check-icon">✓</span>
+          </div>
+          <span class="habit-name">${habit.name}</span>
+          <span class="habit-streak-small">🔥 ${habit.streak}d</span>
+        `;
+        container.appendChild(div);
+      });
+      const streakEl = document.getElementById('habitStreakCount');
+      if (streakEl) streakEl.textContent = state.streak;
+    }
+
+    function toggleHabit(id) {
+      const habit = state.habits.find(h => h.id === id);
+      if (!habit) return;
+      if (!habit.completed) {
+        habit.completed = true;
+        habit.streak++;
+        updateStreak();
+        addXP(10);
+        const allDone = state.habits.every(h => h.completed);
+        if (allDone) { addXP(25); showToast('🎉 All habits done! +25 XP bonus!'); }
+      } else {
+        habit.completed = false;
+      }
+      saveState();
+      renderHabits();
+      updateAllUI();
+      checkBadges();
+    }
+
+    function addHabit() {
+      const input = document.getElementById('habitInput');
+      const name = input.value.trim();
+      if (!name) return;
+      state.habits.push({ id: 'h' + Date.now(), name: name, completed: false, streak: 0 });
+      input.value = '';
+      saveState();
+      renderHabits();
+    }
+
+    function checkDailyReset() {
+      const today = new Date().toDateString();
+      const lastReset = localStorage.getItem('skillforge_habit_reset');
+      if (lastReset !== today) {
+        state.habits.forEach(h => h.completed = false);
+        localStorage.setItem('skillforge_habit_reset', today);
+        saveState();
+        renderHabits();
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      checkDailyReset();
+      renderHabits();
+      
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+      document.getElementById('authModal')?.addEventListener('click', function(e) { if (e.target === e.currentTarget) closeAuthModal(); });
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() { document.getElementById('navLinks').classList.toggle('open'); });
+      document.getElementById('habitInput').addEventListener('keydown', function(e) { if (e.key === 'Enter') addHabit(); });
+      
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) { e.stopPropagation(); userDropdown.classList.toggle('open'); userAvatar.classList.toggle('open'); });
+        document.addEventListener('click', function() { userDropdown.classList.remove('open'); userAvatar.classList.remove('open'); });
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Certificates - Skill Forge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><div class="logo-icon">⚡</div> Skill Forge AI</a>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html">Assess</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="creativity.html">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html">Habits</a></li>
+        <li><a href="chat.html">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="section" style="padding-top: 100px;">
+    <div class="section-header">
+      <span class="section-label">🏆 Achievements</span>
+      <h2>My Certificates</h2>
+      <p>Certificates earned from completed courses. Keep learning to earn more!</p>
+    </div>
+    <div class="certificates-grid" id="certificatesGrid">
+      <p style="color:var(--text-muted); text-align:center; grid-column:1/-1;">Loading...</p>
+    </div>
+  </div>
+
+  <div class="modal-overlay" id="certModal">
+    <div class="modal">
+      <button class="close-modal" onclick="closeCertModal()">✕</button>
+      <div class="certificate" id="certificateDisplay"></div>
+      <div class="certificate-actions">
+        <button class="btn btn-primary" onclick="downloadCertificate()">⬇️ Download PDF</button>
+        <button class="btn btn-secondary" onclick="window.print()">🖨️ Print</button>
+        <button class="btn btn-secondary" onclick="closeCertModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>⚡ Skill Forge AI</h4><p style="color:var(--text-muted);font-size:0.9rem;">Your personal growth companion.</p></div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="assessment.html">Skill Assessment</a></li><li><a href="creativity.html">Creativity</a></li><li><a href="speaking.html">Speaking</a></li><li><a href="habits.html">Habits</a></li><li><a href="chat.html">AI Mentor</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="dashboard.html">Dashboard</a></li><li><a href="certificates.html">Certificates</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">© 2025 Skill Forge AI</div>
+  </footer>
+
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script src="js/courses.js"></script>
+  <script src="js/courses_details_p1.js"></script>
+  <script src="js/courses_details_p2.js"></script>
+  <script src="js/courses_details_p3.js"></script>
+  <script src="js/courses_details_p4.js"></script>
+  <script src="js/courses_details_p5.js"></script>
+  <script src="js/courses_details_p6.js"></script>
+  <script src="js/courses_details.js"></script>
+  <script>
+    function renderCertificates() {
+      const container = document.getElementById('certificatesGrid');
+      const certs = Object.values(state.certificates || {});
+      
+      if (certs.length === 0) {
+        container.innerHTML = `
+          <div class="empty-state">
+            <div style="font-size:3rem; margin-bottom:12px;">🎓</div>
+            <h3>No certificates yet</h3>
+            <p>Complete a course to earn your first certificate!</p>
+            <a href="courses.html" class="btn btn-primary" style="margin-top:16px;">Browse Courses →</a>
+          </div>
+        `;
+        return;
+      }
+      
+      container.innerHTML = certs.map(cert => `
+        <div class="certificate-card">
+          <div class="certificate-thumb">
+            <div class="cert-logo">⚡</div>
+            <div class="cert-thumb-title">CERTIFICATE</div>
+            <div class="cert-thumb-course">${cert.courseTitle}</div>
+            <div class="cert-thumb-name">${state.user.name}</div>
+          </div>
+          <div class="certificate-card-info">
+            <h3>${cert.courseTitle}</h3>
+            <p>Earned on ${new Date(cert.earnedAt).toLocaleDateString()}</p>
+            <div class="cert-code">${cert.code}</div>
+            <button class="btn btn-secondary btn-sm" onclick="openCertModal('${cert.courseId}')">🖼️ View Certificate</button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      renderCertificates();
+      
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+      document.getElementById('authModal')?.addEventListener('click', function(e) { if (e.target === e.currentTarget) closeAuthModal(); });
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() { document.getElementById('navLinks').classList.toggle('open'); });
+      
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) { e.stopPropagation(); userDropdown.classList.toggle('open'); userAvatar.classList.toggle('open'); });
+        document.addEventListener('click', function() { userDropdown.classList.remove('open'); userAvatar.classList.remove('open'); });
+      }
+    });
+
+    function openCertModal(courseId) {
+      const cert = state.certificates[courseId];
+      if (!cert) return;
+      document.getElementById('certificateDisplay').innerHTML = `
+        <div class="certificate-inner">
+          <div class="cert-logo">⚡ Skill Forge AI</div>
+          <div class="cert-title">CERTIFICATE OF COMPLETION</div>
+          <div class="cert-body">
+            <p>This certifies that</p>
+            <div class="cert-name">${state.user.name}</div>
+            <p>has successfully completed the course</p>
+            <div class="cert-course">${cert.courseTitle}</div>
+            <p>with distinction, demonstrating dedication to personal growth.</p>
+            <div class="cert-meta">
+              <div><span>Certificate Code</span><strong>${cert.code}</strong></div>
+              <div><span>Date</span><strong>${new Date(cert.earnedAt).toLocaleDateString()}</strong></div>
+            </div>
+          </div>
+        </div>`;
+      document.getElementById('certModal').classList.add('open');
+    }
+
+    function closeCertModal() {
+      document.getElementById('certModal').classList.remove('open');
+    }
+
+    function downloadCertificate() {
+      window.print();
+    }
+  </script>
+</body>
+</html>
+

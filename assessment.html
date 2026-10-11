@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Skill Assessment - Skill Forge AI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <style>
+    .assessment-progress {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 24px;
+    }
+    .assessment-progress .dot {
+      flex: 1;
+      height: 6px;
+      border-radius: 6px;
+      background: var(--card-border);
+      transition: background 0.3s ease;
+    }
+    .assessment-progress .dot.done { background: var(--accent); }
+    .skill-dimension-bars { margin: 24px 0; text-align: left; }
+    .skill-bar-row { margin-bottom: 16px; }
+    .skill-bar-row .skill-bar-label {
+      display: flex; justify-content: space-between; align-items: center;
+      font-size: 0.9rem; font-weight: 600; margin-bottom: 6px;
+    }
+    .skill-bar-track {
+      height: 10px; border-radius: 10px; background: var(--card-border); overflow: hidden;
+    }
+    .skill-bar-fill {
+      height: 100%; border-radius: 10px;
+      background: var(--accent-gradient);
+      transition: width 0.8s ease;
+    }
+    .theory-card {
+      text-align: left;
+      padding: 16px 18px;
+      border-radius: 14px;
+      border: 1px solid var(--card-border);
+      background: var(--surface);
+      margin-bottom: 12px;
+    }
+    .theory-card h5 {
+      margin: 0 0 6px;
+      font-size: 0.95rem;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .theory-card p { margin: 0; font-size: 0.88rem; color: var(--text-secondary); line-height: 1.6; }
+    .theory-card .theory-tag {
+      font-size: 0.7rem;
+      padding: 2px 10px;
+      border-radius: 50px;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      margin-left: auto;
+    }
+    .assessment-result { max-width: 680px; margin: 0 auto; }
+  </style>
+</head>
+<body>
+  <div class="bg-mesh"><div class="orb"></div><div class="orb"></div><div class="orb"></div></div>
+  <div class="xp-toast" id="xpToast">+10 XP</div>
+
+  <header>
+    <div class="nav-wrap">
+      <a class="brand" href="index.html"><div class="logo-icon">⚡</div> Skill Forge AI</a>
+<ul class="nav-links" id="navLinks">
+        <li><a href="index.html">Home</a></li>
+        <li><a href="dashboard.html">Dashboard</a></li>
+        <li><a href="assessment.html" class="active">Assess</a></li>
+        <li><a href="courses.html">Courses</a></li>
+        <li><a href="creativity.html">Creative</a></li>
+        <li><a href="speaking.html">Speak</a></li>
+        <li><a href="habits.html">Habits</a></li>
+        <li><a href="chat.html">AI Chat</a></li>
+      </ul>
+      <div class="nav-actions">
+        <button class="theme-toggle" id="themeToggle">🌙</button>
+        <div class="user-avatar" id="userAvatar">
+          <div class="avatar-circle"><span class="avatar-text">E</span></div>
+          <span class="avatar-name" id="avatarName">Explorer</span>
+          <span class="avatar-arrow">▼</span>
+          <div class="user-dropdown" id="userDropdown">
+            <a href="profile.html" class="dropdown-item">👤 My Profile</a>
+            <a href="dashboard.html" class="dropdown-item">📊 Dashboard</a>
+            <a href="certificates.html" class="dropdown-item">🏆 Certificates</a>
+            <button class="dropdown-item logout" onclick="logoutUser()">🚪 Sign Out</button>
+          </div>
+        </div>
+        <button class="nav-btn" id="loginBtn">Get Started</button>
+        <button class="mobile-menu-btn" id="mobileMenuBtn">☰</button>
+      </div>
+    </div>
+  </header>
+
+  <div class="section" style="padding-top: 100px;">
+    <div class="section-header">
+      <span class="section-label">Skill Assessment</span>
+      <h2>Discover Your Strengths</h2>
+      <p>Take a quick assessment to identify your current skill levels and get personalized recommendations.</p>
+    </div>
+    <div class="assessment-container">
+      <div id="assessmentArea">
+        <div class="question-box" id="questionBox">
+          <h3 id="questionText">Loading question...</h3>
+          <div class="options" id="optionsContainer"></div>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <span style="color:var(--text-muted); font-size:0.9rem;" id="questionCounter">Question 1 of 5</span>
+          <button class="btn btn-primary btn-sm" id="nextQuestionBtn" onclick="nextQuestion()">Next →</button>
+        </div>
+      </div>
+      <div class="assessment-result" id="assessmentResult" style="display:none;">
+        <div class="score-circle" id="scoreCircle">0%</div>
+        <h3>Assessment Complete!</h3>
+        <p style="color:var(--text-secondary); margin-bottom:20px;" id="resultMessage">Great job! Here's your skill breakdown.</p>
+        <div id="skillBreakdown"></div>
+        <div style="display:flex; gap:12px; justify-content:center; flex-wrap:wrap;">
+          <button class="btn btn-primary" onclick="resetAssessment()">Retake</button>
+          <button class="btn btn-secondary" onclick="window.location.href='chat.html'">Discuss with AI</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="footer-grid">
+      <div class="footer-col"><h4>⚡ Skill Forge AI</h4><p style="color:var(--text-muted);font-size:0.9rem;">Your personal growth companion.</p></div>
+      <div class="footer-col"><h4>Tools</h4><ul><li><a href="assessment.html">Skill Assessment</a></li><li><a href="creativity.html">Creativity</a></li><li><a href="speaking.html">Speaking</a></li><li><a href="habits.html">Habits</a></li><li><a href="chat.html">AI Mentor</a></li></ul></div>
+      <div class="footer-col"><h4>Account</h4><ul><li><a href="profile.html">Profile</a></li><li><a href="dashboard.html">Dashboard</a></li></ul></div>
+    </div>
+    <div class="footer-bottom">© 2025 Skill Forge AI</div>
+  </footer>
+
+  <script src="js/state.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/shared.js"></script>
+  <script>
+    // =============================================
+    // 10-QUESTION ASSESSMENT - 6 SKILL DIMENSIONS
+    // Each question maps to a dimension. Scores 1-5.
+    // =============================================
+    const DIMENSIONS = ['learning', 'problem', 'speaking', 'creativity', 'time', 'habits'];
+
+    const DIMENSION_INFO = {
+      learning: { name: 'Learning & Study', icon: '📚' },
+      problem: { name: 'Problem Solving', icon: '🧩' },
+      speaking: { name: 'Communication & Speaking', icon: '🎤' },
+      creativity: { name: 'Creativity & Innovation', icon: '🎨' },
+      time: { name: 'Time Management', icon: '⏰' },
+      habits: { name: 'Habits & Consistency', icon: '🔥' }
+    };
+
+    const THEORIES = {
+      learning: {
+        high: 'You learn effectively. Keep using <strong>active recall</strong> (testing yourself) and <strong>spaced repetition</strong> — review material at growing intervals to lock it into long-term memory.',
+        mid: 'Good foundation! Boost learning by adding the <strong>Feynman Technique</strong>: explain each concept in simple words as if teaching a child. Gaps in your explanation = gaps in understanding. Review weekly.',
+        low: 'Try the <strong>Pomodoro method</strong> (25 min focus / 5 min break) to build focus, then practice <strong>active recall</strong> with flashcards instead of re-reading. Small daily sessions beat long cramming.'
+      },
+      problem: {
+        high: 'Excellent analytical thinking! Sharpen it further by practicing <strong>first-principles thinking</strong> — break problems down to core truths and rebuild solutions from there.',
+        mid: 'You have a solid approach. Strengthen it by writing down the problem, splitting it into smaller sub-problems, and solving each one before combining. Practice with logic puzzles and coding challenges.',
+        low: 'Build problem-solving with a simple routine: 1) Define the real problem clearly, 2) Brainstorm 3+ approaches without judging, 3) Pick one, try it, learn, iterate. Use our <strong>Creativity Challenges</strong> to practice.'
+      },
+      speaking: {
+        high: 'Great confidence! Push further by recording yourself, joining debates, and structuring talks with a strong opening, 3 key points, and a memorable close. Use our <strong>Public Speaking</strong> module daily.',
+        mid: 'You can speak but nerves may hold you back. Practice the <strong>3-P rule</strong>: Prepare (outline), Practice (aloud, recorded), Perform (start small, grow audience). Daily 2-minute speaking drills build rapid progress.',
+        low: 'Start small: practice speaking in front of a mirror, then record 60-second videos daily. Focus on <strong>one improvement per day</strong> (pace, eye contact, or clarity). Our <strong>Speaking</strong> module gives you topics and tips.'
+      },
+      creativity: {
+        high: 'You naturally think outside the box. Channel it with <strong>divergent → convergent</strong> practice: generate 10+ ideas first, then narrow to the best. Cross-pollinate ideas from different fields for breakthroughs.',
+        mid: 'You have creative potential. Train it daily with <strong>brainstorming exercises</strong> — aim for quantity before quality. Try reverse thinking: how to make a problem worse, then invert it into solutions.',
+        low: 'Creativity is a trainable muscle! Start with the <strong>10 Ideas Method</strong> — list 10 uses for an everyday object in 3 minutes. Do one <strong>Creativity Challenge</strong> daily and watch your fluency grow.'
+      },
+      time: {
+        high: 'Outstanding time management! Keep it sharp by reviewing your week every Sunday, protecting deep-work blocks, and using the <strong>Eisenhower Matrix</strong> to prioritize what matters.',
+        mid: 'You have a routine but can improve. Use the <strong>Eisenhower Matrix</strong>: sort tasks by Urgent/Important. Do First (urgent+important), Schedule (important), Delegate (urgent), Eliminate (neither). Protect 2-hour focus blocks.',
+        low: 'Start with the <strong>2-Minute Rule</strong>: if a task takes under 2 minutes, do it now. Then use <strong>time-blocking</strong> — assign each hour a purpose. Track progress in our <strong>Habit Tracker</strong> to build momentum.'
+      },
+      habits: {
+        high: 'Your consistency is a superpower! Maintain it by keeping your streak alive — and if you miss a day, <strong>never miss two</strong>. Review your habit loop: Cue → Craving → Response → Reward.',
+        mid: 'You have some consistency. Make habits stick with <strong>habit stacking</strong>: pair a new habit with an existing one ("After I brush my teeth, I meditate for 2 minutes"). Make cues obvious and rewards immediate.',
+        low: 'Start tiny — a <strong>2-minute version</strong> of the habit you want (e.g., "read one page"). Make the cue obvious, the action easy, and the reward satisfying. Log it daily in our <strong>Habit Tracker</strong> and build your streak.'
+      }
+    };
+
+    const questions = [
+      // Learning (Q1, Q2)
+      { dim: 'learning', q: 'How do you prefer to learn a new skill?', options: ['By reading and watching tutorials', 'By hands-on practice', 'By discussing with others', 'By teaching someone else'], scores: [2, 4, 3, 5] },
+      { dim: 'learning', q: 'When you study, how often do you test yourself instead of just re-reading?', options: ['Always — I quiz myself regularly', 'Sometimes', 'Rarely', 'Never — I just re-read'], scores: [5, 4, 2, 1] },
+      // Problem solving (Q3, Q4)
+      { dim: 'problem', q: 'When faced with a complex problem, you usually:', options: ['Break it down into smaller parts', 'Look for similar solutions online', 'Ask for help immediately', 'Take a break and think creatively'], scores: [5, 3, 2, 4] },
+      { dim: 'problem', q: 'When your first solution to a problem fails, you:', options: ['Analyze why and try a new approach', 'Try the same thing harder', 'Give up and move on', 'Blame the problem itself'], scores: [5, 3, 1, 2] },
+      // Speaking (Q5, Q6)
+      { dim: 'speaking', q: 'How often do you practice speaking or presenting?', options: ['Daily', 'Weekly', 'Rarely', 'Never'], scores: [5, 4, 2, 1] },
+      { dim: 'speaking', q: 'When speaking in front of others, you feel:', options: ['Confident and prepared', 'A little nervous but I manage', 'Very nervous', 'I avoid it entirely'], scores: [5, 4, 2, 1] },
+      // Creativity (Q7)
+      { dim: 'creativity', q: 'What\'s your approach to creative tasks?', options: ['I brainstorm freely', 'I follow a structured process', 'I look for inspiration from others', 'I struggle to get started'], scores: [5, 4, 3, 1] },
+      // Time management (Q8)
+      { dim: 'time', q: 'How do you manage your time?', options: ['I use a strict schedule', 'I have a general routine', 'I go with the flow', 'I procrastinate a lot'], scores: [5, 4, 2, 1] },
+      // Habits (Q9, Q10)
+      { dim: 'habits', q: 'How consistent are you with daily habits?', options: ['Very consistent — I rarely miss', 'Mostly consistent', 'Sometimes I lose track', 'I struggle to stay consistent'], scores: [5, 4, 2, 1] },
+      { dim: 'habits', q: 'When you miss a day of a habit, you usually:', options: ['Get back on track the next day', 'Feel bad but restart soon', 'Lose momentum for a while', 'Give up entirely'], scores: [5, 4, 2, 1] }
+    ];
+
+    let currentQuestion = 0;
+    let answers = [];
+
+    function startAssessment() {
+      currentQuestion = 0;
+      answers = [];
+      document.getElementById('assessmentArea').style.display = 'block';
+      document.getElementById('assessmentResult').style.display = 'none';
+      showQuestion();
+    }
+
+    function showQuestion() {
+      const q = questions[currentQuestion];
+      document.getElementById('questionText').textContent = q.q;
+      const container = document.getElementById('optionsContainer');
+      container.innerHTML = '';
+      q.options.forEach((opt, i) => {
+        const div = document.createElement('div');
+        div.className = 'option' + (answers[currentQuestion] === i ? ' selected' : '');
+        div.textContent = opt;
+        div.onclick = () => selectOption(i);
+        container.appendChild(div);
+      });
+      document.getElementById('questionCounter').textContent = `Question ${currentQuestion + 1} of ${questions.length}`;
+      document.getElementById('nextQuestionBtn').textContent = currentQuestion === questions.length - 1 ? 'Finish ✓' : 'Next →';
+    }
+
+    function selectOption(index) {
+      answers[currentQuestion] = index;
+      document.querySelectorAll('.option').forEach((el, i) => el.classList.toggle('selected', i === index));
+    }
+
+    function nextQuestion() {
+      if (answers[currentQuestion] === undefined) { showToast('Please select an answer'); return; }
+      if (currentQuestion < questions.length - 1) { currentQuestion++; showQuestion(); }
+      else { finishAssessment(); }
+    }
+
+    function finishAssessment() {
+      // Per-dimension scores
+      const dimScores = {};
+      const dimTotals = {};
+      DIMENSIONS.forEach(d => { dimScores[d] = 0; dimTotals[d] = 0; });
+      answers.forEach((ans, i) => {
+        const dim = questions[i].dim;
+        dimScores[dim] += questions[i].scores[ans] || 0;
+        dimTotals[dim] += 5;
+      });
+
+      // Overall percentage
+      let totalScore = 0, maxScore = 0;
+      DIMENSIONS.forEach(d => { totalScore += dimScores[d]; maxScore += dimTotals[d]; });
+      const percentage = Math.round((totalScore / maxScore) * 100);
+      document.getElementById('scoreCircle').textContent = percentage + '%';
+
+      let msg = 'Keep going! Every expert was once a beginner.';
+      if (percentage >= 80) msg = 'Outstanding! You have strong self-awareness and growth skills!';
+      else if (percentage >= 60) msg = 'Great foundation! Focus on consistency and practice.';
+      else if (percentage >= 40) msg = 'Good start! Identify one area to improve and work on it daily.';
+      document.getElementById('resultMessage').textContent = msg;
+
+      // Build skill bars + theory cards
+      let barsHtml = '<div class="skill-dimension-bars">';
+      DIMENSIONS.forEach(d => {
+        const pct = Math.round((dimScores[d] / dimTotals[d]) * 100);
+        const info = DIMENSION_INFO[d];
+        barsHtml += `
+          <div class="skill-bar-row">
+            <div class="skill-bar-label"><span>${info.icon} ${info.name}</span><span>${pct}%</span></div>
+            <div class="skill-bar-track"><div class="skill-bar-fill" style="width:${pct}%"></div></div>
+          </div>`;
+      });
+      barsHtml += '</div>';
+      barsHtml += '<div class="theory-card"><h5>🧠 How to Improve <span class="theory-tag">Theory + Action</span></h5></div>';
+      DIMENSIONS.forEach(d => {
+        const pct = Math.round((dimScores[d] / dimTotals[d]) * 100);
+        const level = pct >= 70 ? 'high' : (pct >= 45 ? 'mid' : 'low');
+        barsHtml += `<div class="theory-card"><h5>${DIMENSION_INFO[d].icon} ${DIMENSION_INFO[d].name}</h5><p>${THEORIES[d][level]}</p></div>`;
+      });
+
+      document.getElementById('skillBreakdown').innerHTML = barsHtml;
+
+      // Add to state
+      state.assessmentScore = percentage;
+      state.assessmentDimensions = {};
+      DIMENSIONS.forEach(d => { state.assessmentDimensions[d] = Math.round((dimScores[d] / dimTotals[d]) * 100); });
+
+      document.getElementById('assessmentArea').style.display = 'none';
+      document.getElementById('assessmentResult').style.display = 'block';
+      state.assessmentCount++;
+      state.assessmentCompleted = true;
+      addXP(30);
+      checkBadges();
+    }
+
+    function resetAssessment() { startAssessment(); }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      initAuth();
+      initPageTransition();
+      updateAllUI();
+      if (state.assessmentCompleted && state.assessmentCount > 0) {
+        document.getElementById('assessmentArea').style.display = 'none';
+        document.getElementById('assessmentResult').style.display = 'block';
+        if (state.assessmentScore) {
+          document.getElementById('scoreCircle').textContent = state.assessmentScore + '%';
+        }
+      } else {
+        startAssessment();
+      }
+      document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+      document.getElementById('loginBtn').addEventListener('click', openAuthModal);
+      document.getElementById('authModal')?.addEventListener('click', function(e) { if (e.target === e.currentTarget) closeAuthModal(); });
+      document.getElementById('mobileMenuBtn').addEventListener('click', function() { document.getElementById('navLinks').classList.toggle('open'); });
+
+      const userAvatar = document.getElementById('userAvatar');
+      const userDropdown = document.getElementById('userDropdown');
+      if (userAvatar && userDropdown) {
+        userAvatar.addEventListener('click', function(e) { e.stopPropagation(); userDropdown.classList.toggle('open'); userAvatar.classList.toggle('open'); });
+        document.addEventListener('click', function() { userDropdown.classList.remove('open'); userAvatar.classList.remove('open'); });
+      }
+    });
+  </script>
+</body>
+</html>
